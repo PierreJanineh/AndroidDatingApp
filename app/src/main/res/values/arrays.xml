@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO -->
+    <string-array name="ethnicity">
+        <item>Prefer not to say</item>
+        <item>Middle Eastern</item>
+        <item>Native American</item>
+        <item>African American</item>
+        <item>European</item>
+        <item>Latino</item>
+        <item>Asian</item>
+    </string-array>
+
+    <string-array name="reference">
+        <item>Prefer not to say</item>
+        <item>He</item>
+        <item>She</item>
+        <item>He /She</item>
+        <item>They</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="religion">
+        <item>Prefer not to say</item>
+        <item>Christian</item>
+        <item>Muslim</item>
+        <item>Jew</item>
+        <item>Atheist</item>
+    </string-array>
+
+    <string-array name="relationship">
+        <item>Prefer not to say</item>
+        <item>In a relationship/ Single</item>
+        <item>In a relationship/ Couple</item>
+        <item>In an open relationship</item>
+        <item>Single</item>
+        <item>Divorced</item>
+        <item>Widowed</item>
+        <item>It\'s complicated</item>
+    </string-array>
+
+    <string-array name="orientation">
+        <item>Prefer not to say</item>
+        <item>Straight</item>
+        <item>Gay</item>
+        <item>Bisexual</item>
+        <item>Transexual</item>
+        <item>Transgender</item>
+        <item>Pansexual</item>
+    </string-array>
+
+    <string-array name="stds">
+        <item>Prefer not to say</item>
+        <item>HIV+</item>
+        <item>HIV-</item>
+    </string-array>
+
+    <string-array name="role">
+        <item>Prefer not to say</item>
+        <item>Top</item>
+        <item>Bottom</item>
+        <item>Vers</item>
+        <item>Vers/Top</item>
+        <item>Vers/Bottom</item>
+    </string-array>
+
+    <string-array name="disability">
+        <item>Prefer not to say</item>
+        <item>Blind</item>
+    </string-array>
+</resources>
