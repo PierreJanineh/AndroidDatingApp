@@ -28,7 +28,6 @@ public class Room {
                   5. lastMessage    Message
      */
 
-
     public static final String ROOM_UID = "roomUid";
     public static final String SEEN_BY = "seenBy";
     public static final String MESSAGES = "messages";
@@ -47,6 +46,11 @@ public class Room {
         this.lastMessage = lastMessage;
     }
 
+    /**
+     * Creates a Room object from JsonObject by every parameter id.
+     * @param jsonObject
+     * JsonObject of Room.
+     */
     public Room(JsonObject jsonObject){
         this.uid = jsonObject.get(ROOM_UID).getAsInt();
         ArrayList<Integer> arr = new ArrayList<>();
@@ -83,15 +87,30 @@ public class Room {
         }
     }
 
+    /**
+     * Creates a Room object from JsonObject String by parsing String to Json.
+     * @param jsonObject
+     * JsonObject String.
+     */
+    public Room(String jsonObject) {
+        JsonParser parser = new JsonParser();
+        Room room = new Room(parser.parse(jsonObject).getAsJsonObject());
+        this.uid = room.getUid();
+        this.seenBy = room.getSeenBy();
+        this.messages = room.getMessages();
+        this.recipients = room.getRecipients();
+        this.lastMessage = room.getLastMessage();
+    }
+
+    /**
+     * Creates a Room object by reading InputStream Json String.
+     * @param inputStream
+     * InputStream from Socket.
+     * @throws IOException
+     * throws IOException is reading from InputStream fails.
+     */
     public Room(InputStream inputStream) throws IOException {
-        int jsonLength = inputStream.read();
-        if (jsonLength == -1)
-            throw new IOException("json hasn't been sent");
-        byte[] jsonBytes = new byte[jsonLength];
-        int actuallyRead = inputStream.read(jsonBytes);
-        if (actuallyRead != jsonLength)
-            throw new IOException("");
-        Room jsonRoom = getRoomFromJson(new String(jsonBytes));
+        Room jsonRoom = new Room(SocketServer.readStringFromInptStrm(inputStream));
         this.uid = jsonRoom.getUid();
         this.seenBy = jsonRoom.getSeenBy();
         this.messages = jsonRoom.getMessages();
@@ -99,24 +118,23 @@ public class Room {
         this.lastMessage = jsonRoom.getLastMessage();
     }
 
+    /**
+     *
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     public static List<Room> readRooms(InputStream inputStream) throws IOException{
-        String s = null;
-        try {
-            s = SocketServer.readStringFromInputStream(inputStream);
-        } catch (Exception e) {
-            Log.d("readusers", e.getClass().getName());
-        }
-
-//        int jsonLength = inputStream.read();
-//        if (jsonLength == -1)
-//            throw new IOException("json hasn't been sent");
-//        byte[] jsonBytes = new byte[jsonLength];
-//        int actuallyRead = inputStream.read(jsonBytes);
-//        if (actuallyRead != jsonLength)
-//            throw new IOException("");
-        return Arrays.asList(getArrayOfRoomsFromJson(s));
+        return Arrays.asList(getArrayOfRoomsFromJson(SocketServer.readStringFromInptStrm(inputStream)));
     }
 
+    /**
+     * Gets Room[] from JsonArray String.
+     * @param json
+     * JsonArray as String that contains room objects.
+     * @return
+     * Array of Rooms (Room[]).
+     */
     public static Room[] getArrayOfRoomsFromJson(String json) {
         JsonParser parser = new JsonParser();
         JsonArray array = parser.parse(json).getAsJsonArray();
@@ -127,21 +145,6 @@ public class Room {
             rooms[i] = room;
         }
         return rooms;
-    }
-
-    /**
-     * Get Room object from Json String.
-     * @param json
-     * Json String.
-     * @return
-     * Room Object.
-     */
-    public static Room getRoomFromJson(String json) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
-
-        Gson gson = builder.create();
-        return gson.fromJson(json, Room.class);
     }
 
     /**

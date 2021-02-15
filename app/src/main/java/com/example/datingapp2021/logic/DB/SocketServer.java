@@ -58,7 +58,7 @@ public class SocketServer {
 
     private static SmallUser currentSmallUser;
 
-    public static String readStringFromInputStream(InputStream inputStream) {
+    public static String readStringFromInptStrm(InputStream inputStream) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         try{
             int nRead;

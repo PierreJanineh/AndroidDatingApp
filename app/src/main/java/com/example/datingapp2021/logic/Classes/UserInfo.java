@@ -137,7 +137,7 @@ public class UserInfo {
     }
 
     public UserInfo(InputStream inputStream) throws IOException, ParseException {
-        String s = SocketServer.readStringFromInputStream(inputStream);
+        String s = SocketServer.readStringFromInptStrm(inputStream);
         JsonParser parser = new JsonParser();
         JsonObject object = parser.parse(s).getAsJsonObject();
         UserInfo userInfo = new UserInfo(object);

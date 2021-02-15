@@ -42,7 +42,7 @@ public class SmallUser {
     }
 
     public SmallUser(InputStream inputStream) throws IOException {
-        String s = SocketServer.readStringFromInputStream(inputStream);
+        String s = SocketServer.readStringFromInptStrm(inputStream);
         JsonParser parser = new JsonParser();
         JsonObject object = parser.parse(s).getAsJsonObject();
         SmallUser user = new SmallUser(object);

@@ -16,9 +16,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.datingapp2021.logic.Classes.WholeUser.IMG_URL;
-import static com.example.datingapp2021.logic.DB.SocketServer.READY;
-
 public class UserDistance {
 
     /*
@@ -62,7 +59,7 @@ public class UserDistance {
 
     public UserDistance(InputStream inputStream, boolean isWhole){
         try{
-            String s = SocketServer.readStringFromInputStream(inputStream);
+            String s = SocketServer.readStringFromInptStrm(inputStream);
             JsonParser parser = new JsonParser();
             JsonObject object = parser.parse(s).getAsJsonObject();
             if (isWhole) {
@@ -83,7 +80,7 @@ public class UserDistance {
         Log.d("system.err", "readUsers: ");
         String s = null;
         try {
-            s = SocketServer.readStringFromInputStream(inputStream);
+            s = SocketServer.readStringFromInptStrm(inputStream);
         } catch (Exception e) {
             Log.d("readusers", e.getClass().getName());
         }
@@ -104,21 +101,6 @@ public class UserDistance {
 
     public double getDistanceInKM(){
         return distance * 0.62137119;
-    }
-
-    /**
-     * Get UserDistance object from Json String.
-     * @param json
-     * Json String.
-     * @return
-     * UserDistance Object.
-     */
-    public static UserDistance getUserDistanceFromJson(String json) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
-
-        Gson gson = builder.create();
-        return gson.fromJson(json, UserDistance.class);
     }
 
     /**

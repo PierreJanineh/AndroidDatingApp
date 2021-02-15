@@ -1,7 +1,6 @@
 package com.example.datingapp2021.logic.Classes;
 
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -84,7 +83,7 @@ public class WholeUser {
      * throws IOParseException if parsing Json failed.
      */
     public WholeUser(InputStream inputStream) throws IOException, ParseException {
-        String s = SocketServer.readStringFromInputStream(inputStream);
+        String s = SocketServer.readStringFromInptStrm(inputStream);
         JsonParser parser = new JsonParser();
         JsonObject object = parser.parse(s).getAsJsonObject();
         this.uid = object.get(WholeUser.UID).getAsInt();
@@ -101,15 +100,19 @@ public class WholeUser {
         this.info = new UserInfo(object);
     }
 
+    /**
+     * Read users from InputStream by reading String and parsing Json.
+     * @param inputStream
+     * InputStream object from socket.
+     * @return
+     * List of UserDistance.
+     * @throws IOException
+     * throws IOException if reading from InputStream fails.
+     * @throws ParseException
+     * throws ParseException if parsing Json fails.
+     */
     public static List<UserDistance> readUsers(InputStream inputStream) throws IOException, ParseException {
-        int jsonLength = inputStream.read();
-        if (jsonLength == -1)
-            throw new IOException("json hasn't been sent");
-        byte[] jsonBytes = new byte[jsonLength];
-        int actuallyRead = inputStream.read(jsonBytes);
-        if (actuallyRead != jsonLength)
-            throw new IOException("");
-        return Arrays.asList(UserDistance.getArrayOfUserDistancesFromJsonString(new String(jsonBytes)));
+        return Arrays.asList(UserDistance.getArrayOfUserDistancesFromJsonString(SocketServer.readStringFromInptStrm(inputStream)));
     }
 
     /**
