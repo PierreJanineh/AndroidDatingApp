@@ -20,14 +20,14 @@ public class ProfileViewModel {
     public boolean userIsNull = true;
 
     public ProfileViewModel() {
-        user = new MutableLiveData<>();
-        favSuccess = new MutableLiveData<>();
+        this.user = new MutableLiveData<>();
+        this.favSuccess = new MutableLiveData<>();
         this.repository = new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler());
     }
 
     public ProfileViewModel(ProfileRepository repository) {
-        user = new MutableLiveData<>();
-        favSuccess = new MutableLiveData<>();
+        this.user = new MutableLiveData<>();
+        this.favSuccess = new MutableLiveData<>();
         this.repository = repository;
     }
 

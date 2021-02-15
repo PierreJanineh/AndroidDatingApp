@@ -20,6 +20,18 @@ import static com.example.datingapp2021.logic.Classes.GeoPoint.GEO_POINT;
 
 public class WholeUser {
 
+    /*
+    User class in Server contains:
+                  1. uid            int
+                  2. username       String
+                  3. geoPoint       GeoPoint
+                  4. img_url        String
+                  5. favs           ArrayList<Integer>
+                  6. chatrooms      ArrayList<Room>
+                  7. info           UserInfo
+     */
+
+
     public static final int ADD = 1;
     public static final int REMOVE = 2;
     public static final String UID = "uid";
@@ -37,20 +49,6 @@ public class WholeUser {
     private ArrayList<Room> chatRooms;
     private UserInfo info;
 
-    public WholeUser() {
-
-    }
-
-    public WholeUser(JsonObject jsonObject) throws ParseException {
-        JsonObject userObject = jsonObject.getAsJsonObject(USER);
-        this.uid = userObject.get(WholeUser.UID).getAsInt();
-        this.username = userObject.get(WholeUser.USERNAME).getAsString();
-        JsonObject geoPointObject = userObject.getAsJsonObject(GEO_POINT);
-        this.geoPoint = new GeoPoint(geoPointObject);
-        this.img_url = userObject.get(IMG_URL).isJsonNull() ? null : userObject.get(IMG_URL).getAsString();
-        this.info = new UserInfo(userObject);
-    }
-
     public WholeUser(int uid, String username, GeoPoint geoPoint, String img_url, ArrayList<Integer> favs, ArrayList<Room> chatRooms, UserInfo info) {
         this.uid = uid;
         this.username = username;
@@ -61,15 +59,31 @@ public class WholeUser {
         this.info = info;
     }
 
+    /**
+     * Creates a WholeUser object from JsonObject.
+     * @param jsonObject
+     * WholeUser jsonObject.
+     */
+    public WholeUser(JsonObject jsonObject) throws ParseException {
+        JsonObject userObject = jsonObject.getAsJsonObject(USER);
+        this.uid = userObject.get(WholeUser.UID).getAsInt();
+        this.username = userObject.get(WholeUser.USERNAME).getAsString();
+        JsonObject geoPointObject = userObject.getAsJsonObject(GEO_POINT);
+        this.geoPoint = new GeoPoint(geoPointObject);
+        this.img_url = userObject.get(IMG_URL).isJsonNull() ? null : userObject.get(IMG_URL).getAsString();
+        this.info = new UserInfo(userObject);
+    }
+
+    /**
+     * Gets a user from InputStream by reading string and creating a new User
+     * @param inputStream
+     * InputStream object from the Socket
+     * @throws IOException
+     * throws IOException if reading from InputStream fails.
+     * @throws ParseException
+     * throws IOParseException if parsing Json failed.
+     */
     public WholeUser(InputStream inputStream) throws IOException, ParseException {
-//        int jsonLength = inputStream.read();
-//        if (jsonLength == -1)
-//            throw new IOException("json hasn't been sent");
-//        byte[] jsonBytes = new byte[jsonLength];
-//        int actuallyRead = inputStream.read(jsonBytes);
-//        if (actuallyRead != jsonLength)
-//            throw new IOException("");
-//        WholeUser jsonWholeUser = getUserFromJson(new String(jsonBytes));
         String s = SocketServer.readStringFromInputStream(inputStream);
         JsonParser parser = new JsonParser();
         JsonObject object = parser.parse(s).getAsJsonObject();
@@ -122,21 +136,6 @@ public class WholeUser {
             }
         }
         return wholeUsers;
-    }
-
-    /**
-     * Get User object from Json String.
-     * @param json
-     * Json String.
-     * @return
-     * User Object.
-     */
-    public static WholeUser getUserFromJson(String json) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
-
-        Gson gson = builder.create();
-        return gson.fromJson(json, WholeUser.class);
     }
 
     /**

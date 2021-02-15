@@ -13,25 +13,34 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Room {
 
+    /*
+    Room class in Server contains:
+                  1. uid            int
+                  2. seenBy         int[]
+                  3. messages       int[]
+                  4. recipients     int[]
+                  5. lastMessage    Message
+     */
+
+
     public static final String ROOM_UID = "roomUid";
     public static final String SEEN_BY = "seenBy";
     public static final String MESSAGES = "messages";
     public static final String RECIPIENTS = "recipients";
-    private int roomUid;
+    private int uid;
     private ArrayList<Integer> seenBy;
     private ArrayList<Integer> messages;
     private ArrayList<Integer> recipients;
     private Message lastMessage;
 
-    public Room(int roomUid, ArrayList<Integer> seenBy, ArrayList<Integer> messages, ArrayList<Integer> recipients, Message lastMessage) {
-        this.roomUid = roomUid;
+    public Room(int uid, ArrayList<Integer> seenBy, ArrayList<Integer> messages, ArrayList<Integer> recipients, Message lastMessage) {
+        this.uid = uid;
         this.seenBy = seenBy;
         this.messages = messages;
         this.recipients = recipients;
@@ -39,7 +48,7 @@ public class Room {
     }
 
     public Room(JsonObject jsonObject){
-        this.roomUid = jsonObject.get(ROOM_UID).getAsInt();
+        this.uid = jsonObject.get(ROOM_UID).getAsInt();
         ArrayList<Integer> arr = new ArrayList<>();
         JsonArray jArr;
         if (jsonObject.has(SEEN_BY) && !jsonObject.getAsJsonArray(SEEN_BY).isJsonNull()) {
@@ -83,7 +92,7 @@ public class Room {
         if (actuallyRead != jsonLength)
             throw new IOException("");
         Room jsonRoom = getRoomFromJson(new String(jsonBytes));
-        this.roomUid = jsonRoom.getRoomUid();
+        this.uid = jsonRoom.getUid();
         this.seenBy = jsonRoom.getSeenBy();
         this.messages = jsonRoom.getMessages();
         this.recipients = jsonRoom.getRecipients();
@@ -177,12 +186,12 @@ public class Room {
         return builder.create().toJson(this);
     }
 
-    public int getRoomUid() {
-        return roomUid;
+    public int getUid() {
+        return uid;
     }
 
-    public void setRoomUid(int roomUid) {
-        this.roomUid = roomUid;
+    public void setUid(int uid) {
+        this.uid = uid;
     }
 
     public ArrayList<Integer> getSeenBy() {

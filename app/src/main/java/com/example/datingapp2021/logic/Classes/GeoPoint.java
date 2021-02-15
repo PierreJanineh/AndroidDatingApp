@@ -10,6 +10,11 @@ import java.io.OutputStream;
 
 public class GeoPoint {
 
+    /*
+    GeoPoint class in Server contains:
+                  1. lat        float
+                  2. lng        float
+     */
 
     public static final String LAT = "lat";
     public static final String LNG = "lng";

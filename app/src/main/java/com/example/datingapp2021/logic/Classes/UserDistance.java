@@ -21,14 +21,18 @@ import static com.example.datingapp2021.logic.DB.SocketServer.READY;
 
 public class UserDistance {
 
+    /*
+    UserDistance class in Server contains:
+                  1. user           User
+                  2. distance       float
+     */
+
+
     public static final String DISTANCE = "distance";
     private WholeUser wholeUser;
     private SmallUser smallUser;
     private float distance;
     private boolean isWhole;
-
-    public UserDistance() {
-    }
 
     public UserDistance(WholeUser wholeUser, float distance) {
         this.wholeUser = wholeUser;

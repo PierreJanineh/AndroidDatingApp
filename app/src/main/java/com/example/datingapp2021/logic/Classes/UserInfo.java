@@ -25,6 +25,24 @@ import static java.util.Calendar.YEAR;
 
 public class UserInfo {
 
+    /*
+    UserInfo class in Server contains:
+                  1.  uid            int
+                  2.  about          String
+                  3.  wight          GeoPoint
+                  4.  height         String
+                  5.  birthDate      ArrayList<Integer>
+                  6.  relationship   ArrayList<Room>
+                  7.  religion       UserInfo
+                  8.  orientation    Orientation(Enum)
+                  9.  ethnicity      Ethnicity(Enum)
+                  10. stds           STD[](Enums)
+                  11. role           Role(Enum)
+                  12. disabilities   Disability[](Enums)
+                  13. notInDB        boolean
+     */
+
+
     public static final String ABOUT = "about";
     public static final String WEIGHT = "weight";
     public static final String HEIGHT = "height";

@@ -11,6 +11,17 @@ import static com.example.datingapp2021.logic.Classes.WholeUser.IMG_URL;
 
 public class SmallUser {
 
+    /*
+    User class in Server contains:
+                  1. uid            int
+                  2. username       String
+                  3. geoPoint       GeoPoint
+                  4. img_url        String
+                  5. favs           ArrayList<Integer>
+                  6. chatrooms      ArrayList<Room>
+                  7. info           UserInfo
+     */
+
     private int uid;
     private String username;
     private GeoPoint geoPoint;
@@ -23,6 +34,13 @@ public class SmallUser {
         this.img_url = img_url;
     }
 
+    public SmallUser(JsonObject jsonObject){
+        this.uid = jsonObject.get(WholeUser.UID).getAsInt();
+        this.username = jsonObject.get(WholeUser.USERNAME).getAsString();
+        this.geoPoint= new GeoPoint(jsonObject);
+        this.img_url = jsonObject.get(IMG_URL).isJsonNull() ? null : jsonObject.get(IMG_URL).getAsString();
+    }
+
     public SmallUser(InputStream inputStream) throws IOException {
         String s = SocketServer.readStringFromInputStream(inputStream);
         JsonParser parser = new JsonParser();
@@ -32,13 +50,6 @@ public class SmallUser {
         this.username = user.getUsername();
         this.geoPoint = user.getGeoPoint();
         this.img_url = user.getImg_url();
-    }
-
-    public SmallUser(JsonObject jsonObject){
-        this.uid = jsonObject.get(WholeUser.UID).getAsInt();
-        this.username = jsonObject.get(WholeUser.USERNAME).getAsString();
-        this.geoPoint= new GeoPoint(jsonObject);
-        this.img_url = jsonObject.get(IMG_URL).isJsonNull() ? null : jsonObject.get(IMG_URL).getAsString();
     }
 
     public int getUid() {

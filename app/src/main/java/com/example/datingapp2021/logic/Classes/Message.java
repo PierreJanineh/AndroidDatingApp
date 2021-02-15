@@ -12,6 +12,16 @@ import java.sql.Timestamp;
 
 public class Message {
 
+    /*
+    Message class in Server contains:
+                1. uid          int
+                2. to           User
+                3. from         User
+                4. content      String
+                5. timestamp    java.util.Date.Timestamp
+                6. isItMe       boolean
+     */
+
     public static final String UID = "uid";
     public static final String CONTENT = "content";
     public static final String TO = "to";
