@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.datingapp2021.logic.Classes.OtherUser;
 import com.example.datingapp2021.logic.Classes.SmallUser;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.Classes.WholeUser;
 import com.example.datingapp2021.R;
 import com.example.datingapp2021.logic.DB.SocketServer;
@@ -42,17 +43,17 @@ public class FavouriteRecyclerViewAdapterBig extends RecyclerView.Adapter<Favour
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: called.");
-        SmallUser currentSmallUser = SocketServer.getCurrentUser();
-        if(position == 0) {
-            holder.cardView.setRadius(17);
-            holder.cardView.setBackground(null);
-            holder.userName.setText(currentSmallUser.getUsername());
-            holder.distance.setText("0");
-        }else{
-            holder.cardView.setBackgroundResource(R.drawable.ic_launcher_background);
-            holder.userName.setText(wholeUsers.get(position).getUsername());
-//            holder.distance.setText(otherUser.getDistance()+"");
-        }
+//        WholeCurrentUser wholeCurrentUser = SocketServer.getCurrentUser();
+//        if(position == 0) {
+//            holder.cardView.setRadius(17);
+//            holder.cardView.setBackground(null);
+//            holder.userName.setText(wholeCurrentUser.getUsername());
+//            holder.distance.setText("0");
+//        }else{
+//            holder.cardView.setBackgroundResource(R.drawable.ic_launcher_background);
+//            holder.userName.setText(wholeUsers.get(position).getUsername());
+////            holder.distance.setText(otherUser.getDistance()+"");
+//        }
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
             @Override

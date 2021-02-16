@@ -38,8 +38,8 @@ public class DashboardViewModel extends ViewModel {
         this.repository = repository;
     }
 
-    public void getNearbyUsers(){
-        repository.getNearbyUsers(new Callback<List<UserDistance>>() {
+    public void getNearbyUsers(int uid){
+        repository.getNearbyUsers(uid, new Callback<List<UserDistance>>() {
             @Override
             public void onComplete(Result<List<UserDistance>> result) {
                 if (result instanceof Result.Success) {
@@ -59,8 +59,8 @@ public class DashboardViewModel extends ViewModel {
         });
     }
 
-    public void getNewUsers() {
-        repository.getNewUsers(new Callback<List<UserDistance>>() {
+    public void getNewUsers(int uid) {
+        repository.getNewUsers(uid, new Callback<List<UserDistance>>() {
             @Override
             public void onComplete(Result<List<UserDistance>> result) {
                 if (result instanceof Result.Success) {
@@ -99,13 +99,13 @@ public class DashboardViewModel extends ViewModel {
         return image;
     }
 
-    public LiveData<List<UserDistance>> getNewList() {
-        getNewUsers();
+    public LiveData<List<UserDistance>> getNewList(int uid) {
+        getNewUsers(uid);
         return newUsers;
     }
 
-    public LiveData<List<UserDistance>> getNearbyList() {
-        getNearbyUsers();
+    public LiveData<List<UserDistance>> getNearbyList(int uid) {
+        getNearbyUsers(uid);
         return nearbyUsers;
     }
 }

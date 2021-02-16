@@ -28,14 +28,15 @@ public class ChatThreadsRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
 	@NonNull
 	@Override
 	public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-		isItMe = messagesList.get(pos).isItToMe(SocketServer.getCurrentUser().getUid());
-		if(isItMe){
-			View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.my_chat, viewGroup, false);
-			return new MyViewHolder(view);
-		}else {
-			View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.chat, viewGroup, false);
-			return new ViewHolder(view);
-		}
+//		isItMe = messagesList.get(pos).isItToMe(SocketServer.getCurrentUser().getUid());
+//		if(isItMe){
+//			View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.my_chat, viewGroup, false);
+//			return new MyViewHolder(view);
+//		}else {
+//			View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.chat, viewGroup, false);
+//			return new ViewHolder(view);
+//		} TODO
+		return new ViewHolder(viewGroup);
 	}
 	
 	@Override

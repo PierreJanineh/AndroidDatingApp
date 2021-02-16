@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:color="@color/selected"
+        android:state_selected="true" /> <!-- Selected -->
+    <item
+        android:color="@color/notSelected"
+        android:state_selected="false" /> <!-- Not Selected -->
+    <item
+        android:color="@color/notSelected" /> <!-- Default -->
+</selector>

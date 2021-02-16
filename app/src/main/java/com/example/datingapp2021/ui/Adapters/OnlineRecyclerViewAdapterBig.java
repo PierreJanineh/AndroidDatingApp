@@ -18,10 +18,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.datingapp2021.logic.Classes.SmallUser;
+import com.example.datingapp2021.MainActivity;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.R;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.SocketServer;
+import com.example.datingapp2021.logic.Service.MainService;
+import com.example.datingapp2021.ui.dashboard.DashboardFragment;
 import com.example.datingapp2021.ui.dashboard.DashboardRepository;
 import com.example.datingapp2021.ui.dashboard.DashboardViewModel;
 import com.example.datingapp2021.ui.profile.ProfileActivity;
@@ -36,10 +39,11 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
     private static final String TAG = "RecyclerViewAdapter";
 
     private List<UserDistance> users;
-    private Fragment fragment;
+    private DashboardFragment fragment;
     private SharedPreferences sharedPreferences;
 
-    public OnlineRecyclerViewAdapterBig(Fragment fragment, List<UserDistance> users, SharedPreferences sharedPreferences) {
+
+    public OnlineRecyclerViewAdapterBig(DashboardFragment fragment, List<UserDistance> users, SharedPreferences sharedPreferences) {
         this.fragment = fragment;
         this.users = users;
         this.sharedPreferences = sharedPreferences;
@@ -59,14 +63,14 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
 
     @Override
     public void onBindViewHolder(@NotNull ViewHolder holder, final int position) {
-        SmallUser currentSmallUser = SocketServer.getCurrentUser(sharedPreferences);
+        int uid = users.get(position).getSmallUser().getUid();
+        WholeCurrentUser wholeCurrentUser = fragment.service.getCurrentUser(uid);
         if(position == 0) {
             holder.cardView.setRadius(17);
 	        holder.cardView.setBackground(null);
-            holder.userName.setText(currentSmallUser.getUsername());
+            holder.userName.setText(wholeCurrentUser.getUsername());
             holder.distance.setText("0");
         }else{
-
 
             DashboardViewModel viewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
             viewModel.getImageDrawableFromURL(users.get(position).getSmallUser().getImg_url()).observe(fragment, new Observer<Drawable>() {
@@ -78,7 +82,7 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
 
 //            holder.cardView.setBackgroundResource(R.drawable.ic_launcher_background);
             holder.userName.setText(users.get(position).getSmallUser().getUsername());
-            holder.distance.setText(users.get(position).getDistanceInKM()+"");
+            holder.distance.setText(users.get(position).convertDistanceToKM()+"");
         }
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {

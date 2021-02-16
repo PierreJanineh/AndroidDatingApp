@@ -79,6 +79,12 @@ public class UserInfo {
         this.isUploaded = false;
     }
 
+    /**
+     * Creates a UserInfo object from JsonObject.
+     * @param jsonObject
+     * Userinfo jsonObject.
+     * JsonObject{}
+     */
     public UserInfo(JsonObject jsonObject) throws ParseException {
         JsonObject object = jsonObject.getAsJsonObject(INFO);
         this.about = object.get(ABOUT).getAsString();

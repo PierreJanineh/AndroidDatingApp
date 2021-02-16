@@ -1,8 +1,12 @@
 package com.example.datingapp2021.ui.dashboard;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.datingapp2021.databinding.FragmentDashboardBinding;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
+import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.OnlineRecyclerViewAdapterBig;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -36,12 +41,34 @@ public class DashboardFragment extends Fragment {
     private List<UserDistance> nearbyList = new ArrayList<>();
     private List<UserDistance> newList = new ArrayList<>();
 
+    private int uid;
+
+    public MainService service;
+    public boolean bound;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MainService.MainBinder binder = (MainService.MainBinder) iBinder;
+            service = binder.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            bound = false;
+        }
+    };
+
+
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-//        dashboardViewModel =
-//                new ViewModelProvider(this).get(DashboardViewModel.class);
-        dashboardViewModel =
-                new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
+        Intent intent = new Intent(getActivity(), MainService.class);
+        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        dashboardViewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -68,6 +95,7 @@ public class DashboardFragment extends Fragment {
         });
         onlineRV.setLayoutManager(nearbyUsersManager);
 
+        uid = SocketServer.getCurrentUserFrom(getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
         getNewUsers(newUsersAdapter);
 
         getNearbyUsers(onlinePB, nearbyUsersAdapter);
@@ -84,8 +112,27 @@ public class DashboardFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        ifBoundUnbind();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ifBoundUnbind();
+    }
+
+    private void ifBoundUnbind(){
+        if (bound) {
+            getActivity().unbindService(serviceConnection);
+            bound = false;
+        }
+    }
+
     private void getNewUsers(OnlineRecyclerViewAdapterBig newUsersAdapter) {
-        dashboardViewModel.getNewList().observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
+        dashboardViewModel.getNewList(uid).observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
                 if (!dashboardViewModel.newIsNull && list != null && list.size() > 0){
@@ -105,7 +152,7 @@ public class DashboardFragment extends Fragment {
     }
 
     private void getNearbyUsers(ProgressBar onlinePB, OnlineRecyclerViewAdapterBig nearbyUsersAdapter) {
-        dashboardViewModel.getNearbyList().observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
+        dashboardViewModel.getNearbyList(uid).observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
                 if (!dashboardViewModel.nearbyIsNull && list != null && list.size() > 0){

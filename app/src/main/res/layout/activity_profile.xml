@@ -19,7 +19,7 @@
             android:id="@+id/viewPager">
 
         </androidx.viewpager.widget.ViewPager>
-</FrameLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -256,6 +256,7 @@
             </ScrollView>
         </LinearLayout>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        app:backgroundTint="@color/favourite_fab_color_state_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_chat_light_24dp"
@@ -265,6 +266,7 @@
         android:id="@+id/btnChat"
         android:layout_margin="20dp" />
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        app:backgroundTint="@color/favourite_fab_color_state_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_info_light_35dp"
@@ -275,6 +277,7 @@
         android:layout_marginHorizontal="80dp"
         android:onClick="showHide"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        app:backgroundTint="@color/favourite_fab_color_state_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_star_border_white_24dp"

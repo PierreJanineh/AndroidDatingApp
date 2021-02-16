@@ -12,7 +12,6 @@ import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -44,12 +43,12 @@ public class DashboardRepository {
         });
     }
 
-    public void getNearbyUsers(Callback<List<UserDistance>> callback) {
+    public void getNearbyUsers(int uid, Callback<List<UserDistance>> callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    notifyResult(makeSynchronousGetNearbyUsers(), callback);
+                    notifyResult(makeSynchronousGetNearbyUsers(uid), callback);
                 }catch (Exception e){
                     Result<List<UserDistance>> errorResult = new Result.Error<>(e);
                     notifyResult(errorResult, callback);
@@ -58,12 +57,12 @@ public class DashboardRepository {
         });
     }
 
-    public void getNewUsers(Callback<List<UserDistance>> callback) {
+    public void getNewUsers(int uid, Callback<List<UserDistance>> callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    notifyResult(makeSynchronousGetNewUser(), callback);
+                    notifyResult(makeSynchronousGetNewUsers(uid), callback);
                 }catch (Exception e){
                     Result<List<UserDistance>> errorResult = new Result.Error<>(e);
                     notifyResult(errorResult, callback);
@@ -87,8 +86,8 @@ public class DashboardRepository {
         });
     }
 
-    public Result<List<UserDistance>> makeSynchronousGetNearbyUsers() {
-        List<UserDistance> result = SocketServer.getNearbyUsers();
+    public Result<List<UserDistance>> makeSynchronousGetNearbyUsers(int uid) {
+        List<UserDistance> result = SocketServer.getNearbyUsers(uid);
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {
@@ -96,8 +95,8 @@ public class DashboardRepository {
         }
     }
 
-    public Result<List<UserDistance>> makeSynchronousGetNewUser() {
-        List<UserDistance> result = SocketServer.getNewUsers();
+    public Result<List<UserDistance>> makeSynchronousGetNewUsers(int uid) {
+        List<UserDistance> result = SocketServer.getNewUsers(uid);
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {

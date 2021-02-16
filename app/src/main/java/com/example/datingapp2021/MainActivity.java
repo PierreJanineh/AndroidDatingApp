@@ -1,8 +1,14 @@
 package com.example.datingapp2021;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.MenuItem;
 
+import com.example.datingapp2021.logic.Service.MainService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;

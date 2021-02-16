@@ -2,13 +2,11 @@ package com.example.datingapp2021.ui.profile;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.telecom.Call;
 
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 
 public class ProfileRepository {
@@ -67,7 +65,7 @@ public class ProfileRepository {
     }
 
     public Result<UserDistance> makeSynchronousGetUserInfo(SharedPreferences sharedPreferences, int uid) {
-        UserDistance result = SocketServer.getWholeUserDistance(SocketServer.getCurrentUser(sharedPreferences).getUid(), uid);
+        UserDistance result = SocketServer.getWholeUserDistance(SocketServer.getCurrentUserFrom(sharedPreferences), uid);
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {
@@ -76,6 +74,6 @@ public class ProfileRepository {
     }
 
     public Result<Boolean> makeSynchronousAddToFavourites(SharedPreferences sharedPreferences, int uid) {
-        return new Result.Success<>(SocketServer.addFavouriteUser(SocketServer.getCurrentUser(sharedPreferences).getUid(), uid));
+        return new Result.Success<>(SocketServer.addFavouriteUser(SocketServer.getCurrentUserFrom(sharedPreferences), uid));
     }
 }

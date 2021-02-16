@@ -1,27 +1,26 @@
 package com.example.datingapp2021.ui.profile;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.datingapp2021.R;
-import com.example.datingapp2021.logic.Classes.OtherUser;
-import com.example.datingapp2021.logic.Classes.WholeUser;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
+import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.ViewPagerAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,10 +37,11 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ProfileViewModel profileViewModel;
 
+    /*Views defined in XML file (activity_profile)*/
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
-    private LinearLayout linearLayout, infoMenu;
-    private FloatingActionButton openChatBtn;
+    private LinearLayout drawerLayout;
+    private FloatingActionButton infoBtn, chatBtn, favBtn;
     private TextView txtNameAge,
             txtAbout,
             txtRole,
@@ -52,24 +52,69 @@ public class ProfileActivity extends AppCompatActivity {
             txtReference,
             txtOrientation,
             txtReligion;
-    private FloatingActionButton btnFav;
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
 
-    private ServiceConnection serviceConnection;
+    /*Service Connection*/
+    private MainService service;
+    private boolean bound;
+
     private int uid;
-    private WholeUser currentWholeUser;
-    private OtherUser myCurrentUser;
+    private WholeCurrentUser currentWholeUser;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MainService.MainBinder binder = (MainService.MainBinder) iBinder;
+            service = binder.getService();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            bound = false;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        getImagesListForPager();
+        configAndAttachSlidr();
+        setAllViewVariables();
+        setBottomSheetBehavior();
+        profileViewModel();
+        checkIfUidIsFavOrMine();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         Bundle bundle = getIntent().getExtras();
         uid = bundle.getInt("uid");
+        System.out.println("bundle = "+uid);
 
-        getImagesListForPager();
+        Intent intent = new Intent(this, MainService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
+        currentWholeUser = service.getCurrentUser(uid);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bound){
+            unbindService(serviceConnection);
+            bound = false;
+        }
+    }
+
+    /**
+     * Configure Slidr options and attach to Activity to support slide to return.
+     */
+    private void configAndAttachSlidr(){
         SlidrConfig config = new SlidrConfig.Builder()
                 .sensitivity(9999999)
                 .velocityThreshold(0)
@@ -103,9 +148,28 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .build();
         Slidr.attach(this, config);
+    }
 
-        btnFav = findViewById(R.id.btnFav);
-        linearLayout = findViewById(R.id.drawer);
+    /**
+     * Sets BottomSheetBehavior for info view.
+     */
+    private void setBottomSheetBehavior(){
+        bottomSheetBehavior = BottomSheetBehavior.from(drawerLayout);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        bottomSheetBehavior.setHalfExpandedRatio(0.12f);
+        bottomSheetBehavior.setFitToContents(true);
+    }
+
+    /**
+     * Sets all view variables from XML file.
+     */
+    private void setAllViewVariables(){
+        favBtn = findViewById(R.id.btnFav);
+        chatBtn = findViewById(R.id.btnChat);
+        infoBtn = findViewById(R.id.btnInfo);
+
+        drawerLayout = findViewById(R.id.drawer);
+
         txtNameAge = findViewById(R.id.nameAge);
         txtAbout = findViewById(R.id.aboutP);
         txtHeight = findViewById(R.id.txtHeight);
@@ -116,16 +180,13 @@ public class ProfileActivity extends AppCompatActivity {
         txtRole = findViewById(R.id.txtRole);
         txtEthnicity = findViewById(R.id.txtEthnicity);
         txtReference = findViewById(R.id.txtReference);
-        openChatBtn = findViewById(R.id.btnChat);
-        infoMenu = findViewById(R.id.infoMenu);
-        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-        bottomSheetBehavior.setHalfExpandedRatio(0.12f);
-        bottomSheetBehavior.setFitToContents(true);
+    }
 
-        btnFav.setSelected(true);
-        btnFav.setBackgroundDrawable(getResources().getDrawable(R.drawable.grey));
-
+    /**
+     * Creates and defines profileViewModel variable.
+     * And defines a listener for onChange() situation for getUserDistanceObject() method.
+     */
+    private void profileViewModel(){
         profileViewModel = new ProfileViewModel(new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler()));
         profileViewModel.getUserDistanceObject(getSharedPreferences(SocketServer.SP_USERS, MODE_PRIVATE), uid).observe(this, new Observer<UserDistance>() {
             @Override
@@ -145,7 +206,17 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    /**
+     * Checks if the Activity's bundle extras uid equals to the current user's uid, else if the uid is in current user's favs list it assigns favBtn state as selected.
+     */
+    private void checkIfUidIsFavOrMine(){
+        if (currentWholeUser.getUid() == uid){
+            favBtn.setVisibility(View.GONE);
+        }else if (currentWholeUser.getFavs().contains(uid)){
+            favBtn.setSelected(true);
+        }
     }
 
     private void getImagesListForPager() {
@@ -182,7 +253,7 @@ public class ProfileActivity extends AppCompatActivity {
         profileViewModel.addToFavsAndGetBool(getSharedPreferences(SocketServer.SP_USERS, MODE_PRIVATE), uid).observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-
+                favBtn.setSelected(true);
             }
         });
     }

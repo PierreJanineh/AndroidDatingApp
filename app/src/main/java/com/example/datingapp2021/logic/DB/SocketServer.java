@@ -7,6 +7,7 @@ import com.example.datingapp2021.logic.Classes.GeoPoint;
 import com.example.datingapp2021.logic.Classes.Message;
 import com.example.datingapp2021.logic.Classes.Room;
 import com.example.datingapp2021.logic.Classes.SmallUser;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.Classes.WholeUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.Classes.UserInfo;
@@ -18,8 +19,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class SocketServer {
@@ -31,17 +30,19 @@ public class SocketServer {
     public static final int GET_MESSAGES = 102;
     public static final int GET_MESSAGE = 103;
     /*USER*/
-    public static final int GET_NEARBY_USERS = 120;
-    public static final int ADD_USER = 121;
-    public static final int GET_USER_FROM_UID = 122;
-    public static final int ADD_FAV = 123;
-    public static final int REM_FAV = 124;
-    public static final int GET_FAVS = 125;
-    public static final int GET_USERINFO = 126;
-    public static final int UPDATE_USERINFO = 127;
-    public static final int GET_NEW_USERS = 128; //TODO add to server
-    public static final int GET_USERDISTANCE = 129;
-    public static final int GET_SMALL_USER = 130;
+    public static final int GET_USER_FROM_UID = 120;
+    public static final int GET_SMALL_USER = 121;
+    public static final int GET_CURRENT_USER = 122;
+    public static final int GET_NEARBY_USERS = 123;
+    public static final int GET_NEW_USERS = 124;
+    public static final int GET_USERINFO = 125;
+    public static final int GET_USERDISTANCE = 126;
+    public static final int GET_FAVS = 127;
+    public static final int ADD_USER = 128;
+    public static final int ADD_FAV = 129;
+    public static final int REM_FAV = 130;
+    public static final int UPDATE_USERINFO = 131;
+    public static final int UPDATE_USER_FIELDS = 132;
     /*GEO_POINT*/
     public static final int UPDATE_LOCATION = 150;
     /*USER_INFO*/
@@ -56,7 +57,7 @@ public class SocketServer {
     public static final String SP_USERS = "users";
     public static final String SP_UID = "uid";
 
-    private static SmallUser currentSmallUser;
+    private static WholeCurrentUser wholeCurrentUser;
 
     public static String readStringFromInptStrm(InputStream inputStream) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -75,44 +76,16 @@ public class SocketServer {
         return buffer.toString();
     }
 
-    public static SmallUser getCurrentUser(SharedPreferences sharedPreferences) {
-        getCurrentUser();
+    public static int getCurrentUserFrom(SharedPreferences sharedPreferences) {
 //        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(SP_UID, currentSmallUser.getUid());
-        editor.apply();
-        Log.d("Socket_getCurrentUser", "got current user");
-        return currentSmallUser;
-    }
-
-    public static SmallUser getCurrentUser() {
-        ArrayList<Room> rooms = new ArrayList<>();
-        ArrayList<Integer> favs = new ArrayList<>();
-        ArrayList<UserInfo.STD> stds = new ArrayList<>();
-        ArrayList<UserInfo.Disability> disabilities = new ArrayList<>();
-        UserInfo userInfo = new UserInfo(
-                3,
-                "I am a generated Pierre",
-                50,
-                170,
-                new Date(),
-                UserInfo.Relationship.IN_RELATIONSHIP,
-                UserInfo.Religion.ATHEIST,
-                UserInfo.Orientation.BISEXUAL,
-                UserInfo.Ethnicity.MIDDLE_EASTERN,
-                UserInfo.Reference.HE,
-                stds,
-                UserInfo.Role.TOP,
-                disabilities);
-        favs.add(1);
-        currentSmallUser = new SmallUser(
-                3,
-                "GeneratedPierre",
-                new GeoPoint(
-                        1,
-                        1),
-                "");
-        return currentSmallUser;
+        int uid = sharedPreferences.getInt(SP_UID, 0);
+        //if user is not in Shared preference, create one with uid = 3
+        if (uid == 0){
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(SP_UID, 3);
+            editor.apply();
+        }
+        return 3;
     }
 
     public static Message getMessage(int uid){
@@ -168,7 +141,7 @@ public class SocketServer {
             outputStream = socket.getOutputStream();
 
             outputStream.write(SEND_MESSAGE);
-            outputStream.write(SocketServer.getCurrentUser().getUid());
+//            outputStream.write(SocketServer.getCurrentUser().getUid()); TODO
 
             byte[] messageBytes = messageJson.getBytes();
             outputStream.write(messageBytes.length);
@@ -207,7 +180,7 @@ public class SocketServer {
         return false;
     }
 
-    public static List<UserDistance> getNearbyUsers(){
+    public static List<UserDistance> getNearbyUsers(int uid){
 
 
         Socket socket = null;
@@ -220,7 +193,7 @@ public class SocketServer {
             outputStream = socket.getOutputStream();
 
             outputStream.write(GET_NEARBY_USERS);
-            outputStream.write(SocketServer.getCurrentUser().getUid());
+            outputStream.write(uid);
 
             return UserDistance.readUsers(inputStream);
         } catch (UnknownHostException e) {
@@ -390,7 +363,9 @@ public class SocketServer {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } finally {
             if (socket != null) {
                 try {
                     socket.close();
@@ -588,7 +563,7 @@ public class SocketServer {
             outputStream.write(GET_FAVS);
             outputStream.write(currentUser);
 
-            return WholeUser.readUsers(inputStream);
+            return UserDistance.readUsers(inputStream);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -774,7 +749,7 @@ public class SocketServer {
      * @return
      * List of 25 UserDistance
      */
-    public static List<UserDistance> getNewUsers(){
+    public static List<UserDistance> getNewUsers(int uid){
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -784,7 +759,7 @@ public class SocketServer {
             outputStream = socket.getOutputStream();
 
             outputStream.write(GET_NEW_USERS);
-            outputStream.write(SocketServer.getCurrentUser().getUid());
+            outputStream.write(uid);
 
             return UserDistance.readUsers(inputStream);
         } catch (UnknownHostException e) {
@@ -839,6 +814,51 @@ public class SocketServer {
             outputStream.write(uid);
 
             return Room.readRooms(inputStream);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static WholeCurrentUser getCurrentUser(int uid){
+        Socket socket = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try{
+            socket = new Socket(HOST, PORT);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            outputStream.write(GET_CURRENT_USER);
+            outputStream.write(uid);
+
+            return new WholeCurrentUser(inputStream);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
