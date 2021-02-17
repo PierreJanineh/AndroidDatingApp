@@ -37,6 +37,8 @@ public class DashboardFragment extends Fragment {
 
     private DashboardViewModel dashboardViewModel;
     private FragmentDashboardBinding binding;
+    private ProgressBar onlinePB;
+    private SwipeRefreshLayout refreshLayout;
 
     private List<UserDistance> nearbyList = new ArrayList<>();
     private List<UserDistance> newList = new ArrayList<>();
@@ -65,9 +67,6 @@ public class DashboardFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-//        Intent intent = new Intent(getActivity(), MainService.class);
-//        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-
         dashboardViewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
@@ -75,8 +74,8 @@ public class DashboardFragment extends Fragment {
 
         final RecyclerView newRV = binding.newRV;
         final RecyclerView onlineRV = binding.onlineRV;
-        final ProgressBar onlinePB = binding.onlinePB;
-        final SwipeRefreshLayout refreshLayout = binding.refreshLO;
+        onlinePB = binding.onlinePB;
+        refreshLayout = binding.refreshLO;
 
         OnlineRecyclerViewAdapterBig newUsersAdapter = new OnlineRecyclerViewAdapterBig(this, nearbyList, getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
         OnlineRecyclerViewAdapterBig nearbyUsersAdapter = new OnlineRecyclerViewAdapterBig(this, newList, getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
@@ -98,38 +97,18 @@ public class DashboardFragment extends Fragment {
         uid = SocketServer.getCurrentUserFrom(getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
         getNewUsers(newUsersAdapter);
 
-        getNearbyUsers(onlinePB, nearbyUsersAdapter);
+        getNearbyUsers(nearbyUsersAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 onlinePB.setVisibility(View.VISIBLE);
-                getNewUsers(newUsersAdapter);
-                getNearbyUsers(onlinePB, nearbyUsersAdapter);
+                dashboardViewModel.getNewUsers(uid);
+                dashboardViewModel.getNearbyUsers(uid);
             }
         });
 
         return root;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-//        ifBoundUnbind();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-//        ifBoundUnbind();
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-//        if (hidden){
-//            ifBoundUnbind();
-//        }
     }
 
     private void ifBoundUnbind(){
@@ -144,7 +123,6 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
                 if (!dashboardViewModel.newIsNull && list != null && list.size() > 0){
-                    Log.d("onChangedBabe", "onChanged: if1");
                     if (newList.size() > 0){
                         newList.clear();
                     }
@@ -152,29 +130,28 @@ public class DashboardFragment extends Fragment {
                     newUsersAdapter.setList(newList);
                     newUsersAdapter.notifyDataSetChanged();
                 }else {
-                    Log.d("onChangedBabe", "onChanged: else1");
                     Snackbar.make(getContext(), getView(), "No new users at all baby", 10000).show();
                 }
             }
         });
     }
 
-    private void getNearbyUsers(ProgressBar onlinePB, OnlineRecyclerViewAdapterBig nearbyUsersAdapter) {
+    private void getNearbyUsers(OnlineRecyclerViewAdapterBig nearbyUsersAdapter) {
         dashboardViewModel.getNearbyList(uid).observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
                 if (!dashboardViewModel.nearbyIsNull && list != null && list.size() > 0){
-                    Log.d("onChangedBabe", "onChanged: if");
                     if (nearbyList.size() > 0) {
                         nearbyList.clear();
                     }
                     nearbyList.addAll(list);
                     nearbyUsersAdapter.setList(nearbyList);
                     nearbyUsersAdapter.notifyDataSetChanged();
-                    onlinePB.setVisibility(View.GONE);
+                    onlinePB.setVisibility(View.INVISIBLE);
+                    refreshLayout.setRefreshing(false);
                 }else {
-                    Log.d("onChangedBabe", "onChanged: else");
-                    onlinePB.setVisibility(View.GONE);
+                    onlinePB.setVisibility(View.INVISIBLE);
+                    refreshLayout.setRefreshing(false);
                     Snackbar.make(getContext(), getView(), "No nearby users at all baby", 20000).show();
                 }
             }
