@@ -63,12 +63,10 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
 
     @Override
     public void onBindViewHolder(@NotNull ViewHolder holder, final int position) {
-        int uid = users.get(position).getSmallUser().getUid();
-        WholeCurrentUser wholeCurrentUser = fragment.service.getCurrentUser(uid);
         if(position == 0) {
             holder.cardView.setRadius(17);
 	        holder.cardView.setBackground(null);
-            holder.userName.setText(wholeCurrentUser.getUsername());
+            holder.userName.setText(users.get(position).getSmallUser().getUsername());
             holder.distance.setText("0");
         }else{
 
@@ -90,16 +88,16 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked on: ");
                 Intent intent;
-//                if(position == 0){
+                if(position == 0){
 //                    intent = new Intent(mContext, OwnProfileActivity.class);
 //                    mContext.startActivity(intent);
-//                }else {
+                }else {
                     intent = new Intent(fragment.getContext(), ProfileActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putInt("uid", users.get(position).getSmallUser().getUid());
                     intent.putExtras(bundle);
                     fragment.startActivity(intent);
-//                }
+                }
             }
         });
     }

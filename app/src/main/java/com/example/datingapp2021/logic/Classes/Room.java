@@ -1,9 +1,6 @@
 package com.example.datingapp2021.logic.Classes;
 
-import android.util.Log;
-
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,10 +25,11 @@ public class Room {
                   5. lastMessage    Message
      */
 
-    public static final String ROOM_UID = "roomUid";
+    public static final String UID = "uid";
     public static final String SEEN_BY = "seenBy";
     public static final String MESSAGES = "messages";
     public static final String RECIPIENTS = "recipients";
+    public static final String LAST_MESSAGE = "lastMessage";
     private int uid;
     private ArrayList<Integer> seenBy;
     private ArrayList<Integer> messages;
@@ -52,7 +50,7 @@ public class Room {
      * JsonObject of Room.
      */
     public Room(JsonObject jsonObject){
-        this.uid = jsonObject.get(ROOM_UID).getAsInt();
+        this.uid = jsonObject.get(UID).getAsInt();
         ArrayList<Integer> arr = new ArrayList<>();
         JsonArray jArr;
         if (jsonObject.has(SEEN_BY) && !jsonObject.getAsJsonArray(SEEN_BY).isJsonNull()) {
@@ -83,7 +81,7 @@ public class Room {
             this.recipients = new ArrayList<>();
         }
         if (messages != null && !messages.isEmpty()) {
-            this.lastMessage = SocketServer.getMessage(messages.get(messages.size()-1));
+            this.lastMessage = new Message(jsonObject.get(LAST_MESSAGE).getAsJsonObject());
         }
     }
 

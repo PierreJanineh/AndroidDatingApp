@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.example.datingapp2021.logic.Classes.GeoPoint.GEO_POINT;
 import static com.example.datingapp2021.logic.Classes.WholeUser.IMG_URL;
 
 public class SmallUser {
@@ -37,7 +38,8 @@ public class SmallUser {
     public SmallUser(JsonObject jsonObject){
         this.uid = jsonObject.get(WholeUser.UID).getAsInt();
         this.username = jsonObject.get(WholeUser.USERNAME).getAsString();
-        this.geoPoint= new GeoPoint(jsonObject);
+        //Server returns sometimes lat,lng as objects and some other times as variables in User Object
+        this.geoPoint= new GeoPoint(jsonObject.has(GEO_POINT) ? jsonObject.getAsJsonObject(GEO_POINT) : jsonObject);
         this.img_url = jsonObject.get(IMG_URL).isJsonNull() ? null : jsonObject.get(IMG_URL).getAsString();
     }
 

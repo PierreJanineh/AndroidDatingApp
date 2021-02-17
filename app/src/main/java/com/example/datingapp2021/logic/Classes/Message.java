@@ -4,11 +4,15 @@ import com.example.datingapp2021.logic.DB.SocketServer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Message {
 
@@ -25,7 +29,7 @@ public class Message {
     public static final String UID = "uid";
     public static final String CONTENT = "content";
     public static final String TO = "to";
-    public static final String FORM = "form";
+    public static final String FROM = "from";
     public static final String TIMESTAMP = "timestamp";
     private int uid;
     private SmallUser to;
@@ -42,23 +46,33 @@ public class Message {
         this.from = from;
     }
 
+    public Message(String jsonObject){
+        JsonParser parser = new JsonParser();
+        Message message = new Message(parser.parse(jsonObject).getAsJsonObject());
+        this.uid = message.getUid();
+        this.content = message.getContent();
+        this.to = message.getTo();
+        this.from = message.getFrom();
+        this.timestamp = message.getTimestamp();
+    }
+
     public Message(JsonObject jsonObject){
         this.uid = jsonObject.get(UID).getAsInt();
         this.content = jsonObject.get(CONTENT).getAsString();
-        this.to = SocketServer.getSmallUser(jsonObject.get(TO).getAsInt());
-        this.from = SocketServer.getSmallUser(jsonObject.get(FORM).getAsInt());
-        this.timestamp = Timestamp.valueOf(jsonObject.get(TIMESTAMP).getAsString());
+        this.to = new SmallUser(jsonObject.get(TO).getAsJsonObject());
+        this.from = new SmallUser(jsonObject.get(FROM).getAsJsonObject());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d, yyyy, h:mm:ss aa");
+        try {
+            this.timestamp = new Timestamp(simpleDateFormat.parse(jsonObject.get(TIMESTAMP).getAsString()).getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        this.timestamp = Timestamp.valueOf(jsonObject.get(TIMESTAMP).getAsString());
     }
 
     public Message(InputStream inputStream) throws IOException{
-        int jsonLength = inputStream.read();
-        if (jsonLength == -1)
-            throw new IOException("json hasn't been sent");
-        byte[] jsonBytes = new byte[jsonLength];
-        int actuallyRead = inputStream.read(jsonBytes);
-        if (actuallyRead != jsonLength)
-            throw new IOException("");
-        Message jsonMessage = getMessageFromJson(new String(jsonBytes));
+        String json = SocketServer.readStringFromInptStrm(inputStream);
+        Message jsonMessage = new Message(json);
         this.uid = jsonMessage.getUid();
         this.content = jsonMessage.getContent();
         this.timestamp = jsonMessage.getTimestamp();

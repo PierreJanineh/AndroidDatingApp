@@ -497,7 +497,7 @@ public class SocketServer {
      * @return
      * Boolean if successfully removed.
      */
-    public static boolean removeFavouriteUser(int favUser, int currentUser){
+    public static boolean removeFavouriteUser(int currentUser, int favUser){
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -507,13 +507,11 @@ public class SocketServer {
             outputStream = socket.getOutputStream();
 
             outputStream.write(REM_FAV);
-            outputStream.write(favUser);
             outputStream.write(currentUser);
+            outputStream.write(favUser);
 
             int response = inputStream.read();
-            if(response == OKAY){
-                return true;
-            }
+            return response == OKAY;
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

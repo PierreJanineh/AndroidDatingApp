@@ -64,6 +64,20 @@ public class ProfileRepository {
         });
     }
 
+    public void removeFromFavourites(SharedPreferences sharedPreferences, int uid, Callback<Boolean> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    notifyBoolResult(makeSynchronousRemoveFromFavourites(sharedPreferences, uid), callback);
+                } catch (Exception e){
+                    Result<Boolean> errorResult = new Result.Error<>(e);
+                    notifyBoolResult(errorResult, callback);
+                }
+            }
+        });
+    }
+
     public Result<UserDistance> makeSynchronousGetUserInfo(SharedPreferences sharedPreferences, int uid) {
         UserDistance result = SocketServer.getWholeUserDistance(SocketServer.getCurrentUserFrom(sharedPreferences), uid);
         if (result == null) {
@@ -75,5 +89,9 @@ public class ProfileRepository {
 
     public Result<Boolean> makeSynchronousAddToFavourites(SharedPreferences sharedPreferences, int uid) {
         return new Result.Success<>(SocketServer.addFavouriteUser(SocketServer.getCurrentUserFrom(sharedPreferences), uid));
+    }
+
+    public Result<Boolean> makeSynchronousRemoveFromFavourites(SharedPreferences sharedPreferences, int uid) {
+        return new Result.Success<>(SocketServer.removeFavouriteUser(SocketServer.getCurrentUserFrom(sharedPreferences), uid));
     }
 }

@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -13,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
 
@@ -30,7 +33,10 @@ import com.r0adkll.slidr.model.SlidrListener;
 
 import java.util.concurrent.Executors;
 
-public class ProfileActivity extends AppCompatActivity {
+import static com.example.datingapp2021.logic.DB.SocketServer.SP_UID;
+import static com.example.datingapp2021.logic.DB.SocketServer.SP_USERS;
+
+public class ProfileActivity extends AppCompatActivity implements LifecycleOwner {
 
     public static final String TAG = "ProfileManager";
     public static final String COMMA = ", ";
@@ -58,54 +64,73 @@ public class ProfileActivity extends AppCompatActivity {
     private MainService service;
     private boolean bound;
 
-    private int uid;
-    private WholeCurrentUser currentWholeUser;
+    private int uid;//from SharedPreferences
+    private int otherUid;//from intent bundle extras
+    private final MutableLiveData<WholeCurrentUser> currentWholeUser = new MutableLiveData<>();//from service
+    private final MutableLiveData<Boolean> isFav = new MutableLiveData<>();//from view model
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            MainService.MainBinder binder = (MainService.MainBinder) iBinder;
-            service = binder.getService();
-            bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-    };
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection serviceConnection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        onStartActivity();
         getImagesListForPager();
         configAndAttachSlidr();
         setAllViewVariables();
         setBottomSheetBehavior();
         profileViewModel();
-        checkIfUidIsFavOrMine();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    private void onStartActivity() {
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                MainService.MainBinder binder = (MainService.MainBinder) iBinder;
+                service = binder.getService();
+                bound = true;
+                if (service != null) {
+                    currentWholeUser.observe(ProfileActivity.this, new Observer<WholeCurrentUser>() {
+                        @Override
+                        public void onChanged(WholeCurrentUser wholeCurrentUser) {
+                            checkIfUidIsFavOrMine();
+                        }
+                    });
+                    service.currentUser.observe(ProfileActivity.this, new Observer<WholeCurrentUser>() {
+                        @Override
+                        public void onChanged(WholeCurrentUser wholeCurrentUser) {
+                            currentWholeUser.setValue(wholeCurrentUser);
+                        }
+                    });
+                    service.getCurrentUser(uid);
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                bound = false;
+            }
+        };
 
         Bundle bundle = getIntent().getExtras();
-        uid = bundle.getInt("uid");
-        System.out.println("bundle = "+uid);
+        otherUid = bundle.getInt("uid");
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SP_USERS, MODE_PRIVATE);
+        uid = SocketServer.getCurrentUserFrom(sharedPreferences);
 
         Intent intent = new Intent(this, MainService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        currentWholeUser = service.getCurrentUser(uid);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (bound){
+        if (bound) {
             unbindService(serviceConnection);
             bound = false;
         }
@@ -114,7 +139,7 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Configure Slidr options and attach to Activity to support slide to return.
      */
-    private void configAndAttachSlidr(){
+    private void configAndAttachSlidr() {
         SlidrConfig config = new SlidrConfig.Builder()
                 .sensitivity(9999999)
                 .velocityThreshold(0)
@@ -123,13 +148,13 @@ public class ProfileActivity extends AppCompatActivity {
                 .listener(new SlidrListener() {
                     @Override
                     public void onSlideStateChanged(int state) {
-                        Log.d(TAG, "onSlideStateChanged: started. state: "+state);
+                        Log.d(TAG, "onSlideStateChanged: started. state: " + state);
 
                     }
 
                     @Override
                     public void onSlideChange(float percent) {
-                        Log.d(TAG, "onSlideChange: started. percents: "+percent);
+                        Log.d(TAG, "onSlideChange: started. percents: " + percent);
 
                     }
 
@@ -153,7 +178,7 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Sets BottomSheetBehavior for info view.
      */
-    private void setBottomSheetBehavior(){
+    private void setBottomSheetBehavior() {
         bottomSheetBehavior = BottomSheetBehavior.from(drawerLayout);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
         bottomSheetBehavior.setHalfExpandedRatio(0.12f);
@@ -163,7 +188,7 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Sets all view variables from XML file.
      */
-    private void setAllViewVariables(){
+    private void setAllViewVariables() {
         favBtn = findViewById(R.id.btnFav);
         chatBtn = findViewById(R.id.btnChat);
         infoBtn = findViewById(R.id.btnInfo);
@@ -186,17 +211,17 @@ public class ProfileActivity extends AppCompatActivity {
      * Creates and defines profileViewModel variable.
      * And defines a listener for onChange() situation for getUserDistanceObject() method.
      */
-    private void profileViewModel(){
+    private void profileViewModel() {
         profileViewModel = new ProfileViewModel(new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler()));
-        profileViewModel.getUserDistanceObject(getSharedPreferences(SocketServer.SP_USERS, MODE_PRIVATE), uid).observe(this, new Observer<UserDistance>() {
+        profileViewModel.getUserDistanceObject(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<UserDistance>() {
             @Override
             public void onChanged(UserDistance userDistance) {
                 if (userDistance != null) {
                     String ageName = userDistance.getWholeUser().getUsername() + COMMA + userDistance.getWholeUser().getInfo().getAge();
                     txtNameAge.setText(ageName);
                     txtAbout.setText(userDistance.getWholeUser().getInfo().getAbout());
-                    txtHeight.setText(userDistance.getWholeUser().getInfo().getHeight()+"");
-                    txtWeight.setText(userDistance.getWholeUser().getInfo().getWeight()+"");
+                    txtHeight.setText(userDistance.getWholeUser().getInfo().getHeight() + "");
+                    txtWeight.setText(userDistance.getWholeUser().getInfo().getWeight() + "");
                     txtRelationship.setText(userDistance.getWholeUser().getInfo().getRelationship().name());
                     txtReligion.setText(userDistance.getWholeUser().getInfo().getReligion().name());
                     txtOrientation.setText(userDistance.getWholeUser().getInfo().getOrientation().name());
@@ -211,11 +236,17 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Checks if the Activity's bundle extras uid equals to the current user's uid, else if the uid is in current user's favs list it assigns favBtn state as selected.
      */
-    private void checkIfUidIsFavOrMine(){
-        if (currentWholeUser.getUid() == uid){
-            favBtn.setVisibility(View.GONE);
-        }else if (currentWholeUser.getFavs().contains(uid)){
-            favBtn.setSelected(true);
+    private void checkIfUidIsFavOrMine() {
+        if (currentWholeUser.getValue() != null) {
+            if (currentWholeUser.getValue().getUid() == otherUid) {
+                favBtn.setVisibility(View.GONE);
+                isFav.setValue(false);
+            } else if (currentWholeUser.getValue().getFavs().contains(otherUid)) {
+                favBtn.setSelected(true);
+                isFav.setValue(true);
+            }else {
+                isFav.setValue(false);
+            }
         }
     }
 
@@ -234,12 +265,50 @@ public class ProfileActivity extends AppCompatActivity {
 
 
     public void showHide(View view) {
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED){
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        }else{
+        } else {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
         }
     }
+
+    public void addToFavs(View view) {
+        isFav.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                favBtn.setSelected(aBoolean);
+            }
+        });
+        if (isFav.getValue() != null) {
+            System.out.println("other uid = " + otherUid);
+            if (!isFav.getValue()) {
+                profileViewModel.addToFavsAndGetBool(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(Boolean aBoolean) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                isFav.setValue(aBoolean);
+                            }
+                        });
+                    }
+                });
+            } else {
+                profileViewModel.removeFromFavsAndGetBool(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(Boolean aBoolean) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                isFav.setValue(!aBoolean);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
 
 //    public void openChat(View view) {
 //        Intent intent = new Intent(this, ChatActivity.class);
@@ -248,78 +317,5 @@ public class ProfileActivity extends AppCompatActivity {
 //        intent.putExtras(bundle);
 //        startActivity(intent);
 //    }
-    
-    public void addToFavs(View view) {
-        profileViewModel.addToFavsAndGetBool(getSharedPreferences(SocketServer.SP_USERS, MODE_PRIVATE), uid).observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                favBtn.setSelected(true);
-            }
-        });
-    }
-//
-//    private class SetContentValues extends AsyncTask<Void, Void, User>{
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            openChatBtn.setEnabled(false);
-//        }
-//
-//        @Override
-//        protected User doInBackground(Void... voids) {
-//            while(myService == null){
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            return SocketServer.getUserFromUID(uid);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(User user) {
-//            currentUser = user;
-//            myCurrentUser = new OtherUser(currentUser, user);
-//            openChatBtn.setEnabled(true);
-//            UserInfo userInfo = user.getInfo();
-//            if (userInfo != null) {
-//                infoMenu.setVisibility(View.VISIBLE);
-//                int userAge = getAgeFromYear(userInfo.getBirthDate().toString());
-//                txtNameAge.setText(user.getUsername() + ", " + userAge);
-//                txtAbout.setText(String.valueOf(userInfo.getAbout()));
-//                txtHeight.setText(String.valueOf(userInfo.getHeight()));
-//                txtWeight.setText(String.valueOf(userInfo.getWeight()));
-//                txtEthnicity.setText(getResources().getStringArray(R.array.ethnicity)[UserInfo.Ethnicity.getValOf(userInfo.getEthnicity())]);
-//                txtReference.setText(getResources().getStringArray(R.array.reference)[UserInfo.Reference.getValOf(userInfo.getReference())]);
-//                txtRelationship.setText(getResources().getStringArray(R.array.relationship)[UserInfo.Relationship.getValOf(userInfo.getRelationship())]);
-//                txtReligion.setText(getResources().getStringArray(R.array.religion)[UserInfo.Religion.getValOf(userInfo.getReligion())]);
-//                txtOrientation.setText(getResources().getStringArray(R.array.orientation)[UserInfo.Orientation.getValOf(userInfo.getOrientation())]);
-//                txtRole.setText(getResources().getStringArray(R.array.role)[UserInfo.Role.getValOf(userInfo.getRole())]);
-//            }else{
-//                txtNameAge.setText(user.getUsername());
-//                infoMenu.setVisibility(View.GONE);
-//            }
-//        }
-//
-//        private int getAgeFromYear(String birthDate) {
-//            return Calendar.getInstance().get(Calendar.YEAR) - (Integer.valueOf(birthDate.split("/")[2]));
-//        }
-//    }
-    
-//    public class AddToFavs extends AsyncTask<Void, Void, Void>{
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            while (myService == null){
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            myService.addFavourites(currentUser);
-//            return null;
-//        }
-//    }
+
 }

@@ -65,8 +65,8 @@ public class DashboardFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Intent intent = new Intent(getActivity(), MainService.class);
-        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        Intent intent = new Intent(getActivity(), MainService.class);
+//        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         dashboardViewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
 
@@ -115,13 +115,21 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        ifBoundUnbind();
+//        ifBoundUnbind();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        ifBoundUnbind();
+//        ifBoundUnbind();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+//        if (hidden){
+//            ifBoundUnbind();
+//        }
     }
 
     private void ifBoundUnbind(){

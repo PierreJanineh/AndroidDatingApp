@@ -107,10 +107,10 @@ public class WholeCurrentUser {
         JsonObject object = parser.parse(s).getAsJsonObject();
         this.uid = object.get(WholeCurrentUser.UID).getAsInt();
         this.username = object.get(WholeCurrentUser.USERNAME).getAsString();
-        this.geoPoint = new GeoPoint(object);
+        this.geoPoint = new GeoPoint(object.getAsJsonObject(GEO_POINT));
         this.img_url = object.get(IMG_URL).isJsonNull() ? null : object.get(IMG_URL).getAsString();
         ArrayList<Integer> favsArr = new ArrayList<>();
-        if (object.get(FAVS).isJsonNull()){
+        if (object.has(FAVS)){
             jsonArray = object.get(FAVS).getAsJsonArray();
             for (JsonElement element : jsonArray)
                 favsArr.add(element.getAsInt());
@@ -118,7 +118,8 @@ public class WholeCurrentUser {
 
         this.favs = favsArr;
         ArrayList<Room> rooms = null;
-        if (!object.get(CHAT_ROOMS).isJsonNull()){
+        System.out.println("Object = "+object);
+        if (object.has(CHAT_ROOMS)){
             jsonArray = object.get(CHAT_ROOMS).getAsJsonArray();
             rooms = new ArrayList<>();
             for (JsonElement element : jsonArray)

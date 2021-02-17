@@ -14,20 +14,23 @@ import java.util.concurrent.Executors;
 
 public class ProfileViewModel {
 
-    private MutableLiveData<UserDistance> user;
-    private MutableLiveData<Boolean> favSuccess;
+    public MutableLiveData<UserDistance> user;
+    public MutableLiveData<Boolean> favSuccess;
+    public MutableLiveData<Boolean> remSuccess;
     private final ProfileRepository repository;
     public boolean userIsNull = true;
 
     public ProfileViewModel() {
         this.user = new MutableLiveData<>();
         this.favSuccess = new MutableLiveData<>();
+        this.remSuccess = new MutableLiveData<>();
         this.repository = new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler());
     }
 
     public ProfileViewModel(ProfileRepository repository) {
         this.user = new MutableLiveData<>();
         this.favSuccess = new MutableLiveData<>();
+        this.remSuccess = new MutableLiveData<>();
         this.repository = repository;
     }
 
@@ -61,13 +64,27 @@ public class ProfileViewModel {
         });
     }
 
-    public LiveData<Boolean> addToFavsAndGetBool(SharedPreferences sharedPreferences, int uid){
-        addToFavs(sharedPreferences, uid);
+    public void removeFromFavs(SharedPreferences sharedPreferences, int otherUID){
+        repository.removeFromFavourites(sharedPreferences, otherUID, new Callback<Boolean>() {
+            @Override
+            public void onComplete(Result<Boolean> result) {
+                remSuccess.setValue(((Result.Success<Boolean>) result).data);
+            }
+        });
+    }
+
+    public LiveData<Boolean> addToFavsAndGetBool(SharedPreferences sharedPreferences, int otherUID){
+        addToFavs(sharedPreferences, otherUID);
         return favSuccess;
     }
 
-    public LiveData<UserDistance> getUserDistanceObject(SharedPreferences sharedPreferences, int uid) {
-        getUserDistance(sharedPreferences, uid);
+    public LiveData<Boolean> removeFromFavsAndGetBool(SharedPreferences sharedPreferences, int otherUID){
+        removeFromFavs(sharedPreferences, otherUID);
+        return remSuccess;
+    }
+
+    public LiveData<UserDistance> getUserDistanceObject(SharedPreferences sharedPreferences, int otherUID) {
+        getUserDistance(sharedPreferences, otherUID);
         return user;
     }
 }
