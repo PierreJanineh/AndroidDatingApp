@@ -18,19 +18,22 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.datingapp2021.R;
+import com.example.datingapp2021.logic.Classes.Image;
 import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.logic.Service.MainService;
-import com.example.datingapp2021.ui.Adapters.ViewPagerAdapter;
+import com.example.datingapp2021.ui.Adapters.ProfileImagesViewPagerAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrListener;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 import static com.example.datingapp2021.logic.DB.SocketServer.SP_USERS;
@@ -43,8 +46,8 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     private ProfileViewModel profileViewModel;
 
     /*Views defined in XML file (activity_profile)*/
-    private ViewPager viewPager;
-    private ViewPagerAdapter viewPagerAdapter;
+    private ViewPager2 viewPager;
+    private ProfileImagesViewPagerAdapter profileImagesViewPagerAdapter;
     private LinearLayout drawerLayout;
     private FloatingActionButton infoBtn, chatBtn, favBtn;
     private TextView txtNameAge,
@@ -66,6 +69,7 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     private int uid;//from SharedPreferences
     private int otherUid;//from intent bundle extras
     private final MutableLiveData<WholeCurrentUser> currentWholeUser = new MutableLiveData<>();//from service
+    private final MutableLiveData<ArrayList<Image>> images = new MutableLiveData<>();//from view model
     private final MutableLiveData<Boolean> isFav = new MutableLiveData<>();//from view model
 
     /**
@@ -77,15 +81,15 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        onStartActivity();
-        getImagesListForPager();
-        configAndAttachSlidr();
+        bindServiceAndGetUids();
         setAllViewVariables();
+        configAndAttachSlidr();
         setBottomSheetBehavior();
         profileViewModel();
+        initViewPagerAdapter();
     }
 
-    private void onStartActivity() {
+    private void bindServiceAndGetUids() {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -126,13 +130,58 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (bound) {
-            unbindService(serviceConnection);
-            bound = false;
-        }
+    /**
+     * Sets all view variables from XML file.
+     */
+    private void setAllViewVariables() {
+        favBtn = findViewById(R.id.btnFav);
+        chatBtn = findViewById(R.id.btnChat);
+        infoBtn = findViewById(R.id.btnInfo);
+
+        drawerLayout = findViewById(R.id.drawer);
+
+        txtNameAge = findViewById(R.id.nameAge);
+        txtAbout = findViewById(R.id.aboutP);
+        txtHeight = findViewById(R.id.txtHeight);
+        txtWeight = findViewById(R.id.txtWeight);
+        txtRelationship = findViewById(R.id.txtRelationship);
+        txtReligion = findViewById(R.id.txtReligion);
+        txtOrientation = findViewById(R.id.txtOrientation);
+        txtRole = findViewById(R.id.txtRole);
+        txtEthnicity = findViewById(R.id.txtEthnicity);
+        txtReference = findViewById(R.id.txtReference);
+    }
+
+    /**
+     * Creates and defines profileViewModel variable.
+     * And defines a listener for onChange() situation for getUserDistanceObject() method.
+     */
+    private void profileViewModel() {
+        profileViewModel = new ProfileViewModel(new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler()));
+        profileViewModel.getUserDistanceObject(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<UserDistance>() {
+            @Override
+            public void onChanged(UserDistance userDistance) {
+                if (userDistance != null) {
+                    String ageName = userDistance.getWholeUser().getUsername() + COMMA + userDistance.getWholeUser().getInfo().getAge();
+                    txtNameAge.setText(ageName);
+                    txtAbout.setText(userDistance.getWholeUser().getInfo().getAbout());
+                    txtHeight.setText(userDistance.getWholeUser().getInfo().getHeight() + "");
+                    txtWeight.setText(userDistance.getWholeUser().getInfo().getWeight() + "");
+                    txtRelationship.setText(userDistance.getWholeUser().getInfo().getRelationship().name());
+                    txtReligion.setText(userDistance.getWholeUser().getInfo().getReligion().name());
+                    txtOrientation.setText(userDistance.getWholeUser().getInfo().getOrientation().name());
+                    txtRole.setText(userDistance.getWholeUser().getInfo().getRole().name());
+                    txtEthnicity.setText(userDistance.getWholeUser().getInfo().getEthnicity().name());
+                    txtReference.setText(userDistance.getWholeUser().getInfo().getReference().name());
+                }
+            }
+        });
+        profileViewModel.getImagesArray(otherUid).observe(ProfileActivity.this, new Observer<ArrayList<Image>>() {
+            @Override
+            public void onChanged(ArrayList<Image> images) {
+                ProfileActivity.this.images.setValue(images);
+            }
+        });
     }
 
     /**
@@ -185,54 +234,6 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     }
 
     /**
-     * Sets all view variables from XML file.
-     */
-    private void setAllViewVariables() {
-        favBtn = findViewById(R.id.btnFav);
-        chatBtn = findViewById(R.id.btnChat);
-        infoBtn = findViewById(R.id.btnInfo);
-
-        drawerLayout = findViewById(R.id.drawer);
-
-        txtNameAge = findViewById(R.id.nameAge);
-        txtAbout = findViewById(R.id.aboutP);
-        txtHeight = findViewById(R.id.txtHeight);
-        txtWeight = findViewById(R.id.txtWeight);
-        txtRelationship = findViewById(R.id.txtRelationship);
-        txtReligion = findViewById(R.id.txtReligion);
-        txtOrientation = findViewById(R.id.txtOrientation);
-        txtRole = findViewById(R.id.txtRole);
-        txtEthnicity = findViewById(R.id.txtEthnicity);
-        txtReference = findViewById(R.id.txtReference);
-    }
-
-    /**
-     * Creates and defines profileViewModel variable.
-     * And defines a listener for onChange() situation for getUserDistanceObject() method.
-     */
-    private void profileViewModel() {
-        profileViewModel = new ProfileViewModel(new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler()));
-        profileViewModel.getUserDistanceObject(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<UserDistance>() {
-            @Override
-            public void onChanged(UserDistance userDistance) {
-                if (userDistance != null) {
-                    String ageName = userDistance.getWholeUser().getUsername() + COMMA + userDistance.getWholeUser().getInfo().getAge();
-                    txtNameAge.setText(ageName);
-                    txtAbout.setText(userDistance.getWholeUser().getInfo().getAbout());
-                    txtHeight.setText(userDistance.getWholeUser().getInfo().getHeight() + "");
-                    txtWeight.setText(userDistance.getWholeUser().getInfo().getWeight() + "");
-                    txtRelationship.setText(userDistance.getWholeUser().getInfo().getRelationship().name());
-                    txtReligion.setText(userDistance.getWholeUser().getInfo().getReligion().name());
-                    txtOrientation.setText(userDistance.getWholeUser().getInfo().getOrientation().name());
-                    txtRole.setText(userDistance.getWholeUser().getInfo().getRole().name());
-                    txtEthnicity.setText(userDistance.getWholeUser().getInfo().getEthnicity().name());
-                    txtReference.setText(userDistance.getWholeUser().getInfo().getReference().name());
-                }
-            }
-        });
-    }
-
-    /**
      * Checks if the Activity's bundle extras uid equals to the current user's uid, else if the uid is in current user's favs list it assigns favBtn state as selected.
      */
     private void checkIfUidIsFav() {
@@ -246,17 +247,18 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         }
     }
 
-    private void getImagesListForPager() {
-
-        initViewPagerAdapter();
-    }
-
     private void initViewPagerAdapter() {
-        Log.d(TAG, "initViewPagerAdapter: started.");
 
         viewPager = findViewById(R.id.viewPager);
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(viewPagerAdapter);
+        profileImagesViewPagerAdapter = new ProfileImagesViewPagerAdapter(getSupportFragmentManager(), this.getLifecycle());
+        images.observe(this, new Observer<ArrayList<Image>>() {
+            @Override
+            public void onChanged(ArrayList<Image> images) {
+                profileImagesViewPagerAdapter.setItems(images);
+                profileImagesViewPagerAdapter.notifyDataSetChanged();
+            }
+        });
+        viewPager.setAdapter(profileImagesViewPagerAdapter);
     }
 
 
@@ -276,7 +278,6 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
             }
         });
         if (isFav.getValue() != null) {
-            System.out.println("other uid = " + otherUid);
             if (!isFav.getValue()) {
                 profileViewModel.addToFavsAndGetBool(getSharedPreferences(SP_USERS, MODE_PRIVATE), otherUid).observe(this, new Observer<Boolean>() {
                     @Override
@@ -305,6 +306,14 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bound) {
+            unbindService(serviceConnection);
+            bound = false;
+        }
+    }
 
 //    public void openChat(View view) {
 //        Intent intent = new Intent(this, ChatActivity.class);

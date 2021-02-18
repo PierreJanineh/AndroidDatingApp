@@ -3,12 +3,15 @@ package com.example.datingapp2021.ui.profile;
 import android.content.SharedPreferences;
 import android.os.Handler;
 
+import com.example.datingapp2021.logic.Classes.Image;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.Classes.UserInfo;
 import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 public class ProfileRepository {
@@ -18,6 +21,15 @@ public class ProfileRepository {
     public ProfileRepository(Executor executor, Handler handler){
         this.executor = executor;
         this.handler = handler;
+    }
+
+    private void notifyImagesResult(final Result<ArrayList<Image>> result, final Callback<ArrayList<Image>> callback){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onComplete(result);
+            }
+        });
     }
 
     private void notifyCurrentUserResult(final Result<WholeCurrentUser> result, final Callback<WholeCurrentUser> callback){
@@ -43,6 +55,20 @@ public class ProfileRepository {
             @Override
             public void run() {
                 callback.onComplete(result);
+            }
+        });
+    }
+
+    public void getImages(int uid, Callback<ArrayList<Image>> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    notifyImagesResult(makeSynchronousGetImages(uid), callback);
+                }catch (Exception e){
+                    Result<ArrayList<Image>> errorResult = new Result.Error<>(e);
+                    notifyImagesResult(errorResult, callback);
+                }
             }
         });
     }
@@ -115,6 +141,15 @@ public class ProfileRepository {
                 }
             }
         });
+    }
+
+    public Result<ArrayList<Image>> makeSynchronousGetImages(int uid) {
+        ArrayList<Image> result = SocketServer.getImages(uid);
+        if (result == null) {
+            return new Result.SuccessNULL<>("null object received");
+        }else {
+            return new Result.Success<>(result);
+        }
     }
 
     public Result<Boolean> makeSynchronousEditCurrentUser(SharedPreferences sharedPreferences, UserInfo userInfo) {

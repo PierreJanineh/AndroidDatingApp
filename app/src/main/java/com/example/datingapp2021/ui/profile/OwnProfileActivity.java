@@ -7,17 +7,18 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.datingapp2021.R;
-import com.example.datingapp2021.ui.Adapters.ViewPagerAdapter;
+import com.example.datingapp2021.ui.Adapters.ProfileImagesViewPagerAdapter;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrListener;
 
 public class OwnProfileActivity extends AppCompatActivity {
 
-    private ViewPager viewPager;
-    private ViewPagerAdapter viewPagerAdapter;
+    private ViewPager2 viewPager;
+    private ProfileImagesViewPagerAdapter profileImagesViewPagerAdapter;
     private Intent intent;
 
     public static final String TAG = "OwnProfileActivity";
@@ -71,8 +72,8 @@ public class OwnProfileActivity extends AppCompatActivity {
         Log.d(TAG, "initViewPagerAdapter: started.");
 
         viewPager = findViewById(R.id.viewPager);
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(viewPagerAdapter);
+        profileImagesViewPagerAdapter = new ProfileImagesViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        viewPager.setAdapter(profileImagesViewPagerAdapter);
     }
 
     public void settings(View view) {

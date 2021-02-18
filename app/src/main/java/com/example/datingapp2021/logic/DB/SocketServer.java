@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.datingapp2021.logic.Classes.GeoPoint;
+import com.example.datingapp2021.logic.Classes.Image;
 import com.example.datingapp2021.logic.Classes.Message;
 import com.example.datingapp2021.logic.Classes.Room;
 import com.example.datingapp2021.logic.Classes.SmallUser;
@@ -19,6 +20,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SocketServer {
@@ -38,11 +40,12 @@ public class SocketServer {
     public static final int GET_USERINFO = 125;
     public static final int GET_USERDISTANCE = 126;
     public static final int GET_FAVS = 127;
-    public static final int ADD_USER = 128;
-    public static final int ADD_FAV = 129;
-    public static final int REM_FAV = 130;
-    public static final int UPDATE_USERINFO = 131;
-    public static final int UPDATE_USER_FIELDS = 132;
+    public static final int GET_IMAGES = 128;
+    public static final int ADD_USER = 129;
+    public static final int ADD_FAV = 130;
+    public static final int REM_FAV = 131;
+    public static final int UPDATE_USERINFO = 132;
+    public static final int UPDATE_USER_FIELDS = 133;
     /*GEO_POINT*/
     public static final int UPDATE_LOCATION = 150;
     /*USER_INFO*/
@@ -179,6 +182,52 @@ public class SocketServer {
             }
         }
         return false;
+    }
+
+    public static ArrayList<Image> getImages(int uid){
+        Socket socket = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
+        try{
+            socket = new Socket(HOST, 3000);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            outputStream.write(GET_IMAGES);
+            outputStream.write(uid);
+
+            return Image.readImages(inputStream);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 
     public static List<UserDistance> getNearbyUsers(int uid){
