@@ -7,6 +7,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.datingapp2021.logic.Classes.UserDistance;
+import com.example.datingapp2021.logic.Classes.UserInfo;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.ui.Result;
 
 import java.util.List;
@@ -14,24 +16,60 @@ import java.util.concurrent.Executors;
 
 public class ProfileViewModel {
 
+    public MutableLiveData<WholeCurrentUser> currentUser;
     public MutableLiveData<UserDistance> user;
     public MutableLiveData<Boolean> favSuccess;
     public MutableLiveData<Boolean> remSuccess;
+    public MutableLiveData<Boolean> userEditSuccess;
     private final ProfileRepository repository;
     public boolean userIsNull = true;
+    public boolean currentUserIsNull = true;
 
     public ProfileViewModel() {
+        this.currentUser = new MutableLiveData<>();
         this.user = new MutableLiveData<>();
         this.favSuccess = new MutableLiveData<>();
         this.remSuccess = new MutableLiveData<>();
+        this.userEditSuccess = new MutableLiveData<>();
         this.repository = new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler());
     }
 
     public ProfileViewModel(ProfileRepository repository) {
+        this.currentUser = new MutableLiveData<>();
         this.user = new MutableLiveData<>();
         this.favSuccess = new MutableLiveData<>();
         this.remSuccess = new MutableLiveData<>();
+        this.userEditSuccess = new MutableLiveData<>();
         this.repository = repository;
+    }
+
+    public void editCurrentUser(SharedPreferences sharedPreferences, UserInfo userInfo) {
+        repository.editCurrentUser(sharedPreferences, userInfo, new Callback<Boolean>() {
+            @Override
+            public void onComplete(Result<Boolean> result) {
+                userEditSuccess.setValue(((Result.Success<Boolean>) result).data);
+            }
+        });
+    }
+
+    public void getCurrentUser(SharedPreferences sharedPreferences) {
+        repository.getCurrentUser(sharedPreferences, new Callback<WholeCurrentUser>() {
+            @Override
+            public void onComplete(Result<WholeCurrentUser> result) {
+                if (result instanceof Result.Success) {
+                    currentUserIsNull = false;
+                    currentUser.setValue(((Result.Success<WholeCurrentUser>) result).data);
+                }else if (result instanceof Result.SuccessNULL) {
+                    currentUserIsNull = true;
+                    currentUser.setValue(null);
+                    currentUser.postValue(null);
+                }else {
+                    currentUserIsNull = true;
+                    currentUser.setValue(null);
+                    currentUser.postValue(null);
+                }
+            }
+        });
     }
 
     public void getUserDistance(SharedPreferences sharedPreferences, int otherUID) {
@@ -49,7 +87,6 @@ public class ProfileViewModel {
                     userIsNull = true;
                     user.setValue(null);
                     user.postValue(null);
-                    //TODO show error in UI
                 }
             }
         });
@@ -71,6 +108,16 @@ public class ProfileViewModel {
                 remSuccess.setValue(((Result.Success<Boolean>) result).data);
             }
         });
+    }
+
+    public LiveData<Boolean> editCurrentUserAndGetBoolean(SharedPreferences sharedPreferences, UserInfo userInfo) {
+        editCurrentUser(sharedPreferences, userInfo);
+        return userEditSuccess;
+    }
+
+    public LiveData<WholeCurrentUser> getUserCurrentUserObject(SharedPreferences sharedPreferences) {
+        getCurrentUser(sharedPreferences);
+        return currentUser;
     }
 
     public LiveData<Boolean> addToFavsAndGetBool(SharedPreferences sharedPreferences, int otherUID){

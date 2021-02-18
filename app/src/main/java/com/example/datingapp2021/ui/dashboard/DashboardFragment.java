@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -77,8 +78,9 @@ public class DashboardFragment extends Fragment {
         onlinePB = binding.onlinePB;
         refreshLayout = binding.refreshLO;
 
-        OnlineRecyclerViewAdapterBig newUsersAdapter = new OnlineRecyclerViewAdapterBig(this, nearbyList, getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
-        OnlineRecyclerViewAdapterBig nearbyUsersAdapter = new OnlineRecyclerViewAdapterBig(this, newList, getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE);
+        OnlineRecyclerViewAdapterBig newUsersAdapter = new OnlineRecyclerViewAdapterBig(false, this, nearbyList, sharedPreferences);
+        OnlineRecyclerViewAdapterBig nearbyUsersAdapter = new OnlineRecyclerViewAdapterBig(true, this, newList, sharedPreferences);
         LinearLayoutManager newUsersManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         GridLayoutManager nearbyUsersManager = new GridLayoutManager(getContext(), 3);
         newRV.setAdapter(newUsersAdapter);

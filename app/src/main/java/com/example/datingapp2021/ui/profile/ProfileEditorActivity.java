@@ -3,6 +3,7 @@ package com.example.datingapp2021.ui.profile;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -10,11 +11,15 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 
 import com.example.datingapp2021.R;
+import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.Classes.UserInfo;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.SpecialViews.MultiSpinner;
 
@@ -23,14 +28,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static com.example.datingapp2021.logic.DB.SocketServer.SP_UID;
+import static com.example.datingapp2021.logic.DB.SocketServer.SP_USERS;
 
 public class ProfileEditorActivity extends AppCompatActivity{
+    private ProfileViewModel profileViewModel;
+
     private String user;
-    private int image, height, weight, ethnicity, relationship, religion, orientation, reference, role;
-    private ArrayList<UserInfo.STD> stdS;
-    private ArrayList<UserInfo.Disability> disabilities;
+    private int image, height, weight, ethnicity, relationship, religion, orientation, reference, role, disability;
+    private ArrayList<UserInfo.STD> stdS = new ArrayList<>();
+    private ArrayList<UserInfo.Disability> disabilities = new ArrayList<>();
     private String about;
     private Date birthDate;
     private EditText txtAbout;
@@ -66,7 +75,7 @@ public class ProfileEditorActivity extends AppCompatActivity{
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-//        new SetValuesTask().execute();
+        profileViewModel();
 
         pkrDay.setMinValue(1);
         pkrDay.setMaxValue(31);
@@ -106,7 +115,7 @@ public class ProfileEditorActivity extends AppCompatActivity{
         spnrReference.setAdapter(arrayAdapter);
 
 	    //STDs Spinner
-//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnrSTDs.setItems(R.array.stds, android.R.layout.simple_spinner_item, new MultiSpinner.MultiSpinnerListener() {
             @Override
             public void onItemsSelected(boolean[] selected) {
@@ -115,7 +124,9 @@ public class ProfileEditorActivity extends AppCompatActivity{
 
             @Override
             public void itemSelected(boolean[] selected) {
-                stdS.clear();
+                if (stdS.size() > 0){
+                    stdS.clear();
+                }
                 String[] arr = getResources().getStringArray(R.array.stds);
                 for (int i = 0; i < arr.length; i++) {
                     if (selected[i]){
@@ -131,7 +142,7 @@ public class ProfileEditorActivity extends AppCompatActivity{
         spnrRole.setAdapter(arrayAdapter);
 
         //Disabilities Spinner
-//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnrDisabilities.setItems(R.array.disability, android.R.layout.simple_spinner_item, new MultiSpinner.MultiSpinnerListener() {
             @Override
             public void onItemsSelected(boolean[] selected) {
@@ -140,7 +151,9 @@ public class ProfileEditorActivity extends AppCompatActivity{
 
             @Override
             public void itemSelected(boolean[] selected) {
-                disabilities.clear();
+                if (disabilities.size() > 0){
+                    disabilities.clear();
+                }
                 String[] arr = getResources().getStringArray(R.array.disability);
                 for (int i = 0; i < arr.length; i++) {
                     if (selected[i]){
@@ -150,6 +163,12 @@ public class ProfileEditorActivity extends AppCompatActivity{
             }
         });
 
+        profileViewModel.userEditSuccess.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                Toast.makeText(ProfileEditorActivity.this, aBoolean ? "Updated profile info" : "update error", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 
@@ -168,6 +187,7 @@ public class ProfileEditorActivity extends AppCompatActivity{
         role = spnrRole.getSelectedItemPosition();
         ethnicity = spnrEthnicity.getSelectedItemPosition();
         reference = spnrReference.getSelectedItemPosition();
+        disability = spnrDisabilities.getSelectedItemPosition();
 
         UserInfo userInfo = new UserInfo(
 		        uid,
@@ -183,92 +203,40 @@ public class ProfileEditorActivity extends AppCompatActivity{
                 stdS,
                 UserInfo.Role.getEnumValOf(role),
                 disabilities);
-//        new EditProfileTask().execute(userInfo);
+
+        profileViewModel.editCurrentUser(sharedPreferences, userInfo);
     }
 
-//    private class EditProfileTask extends AsyncTask<UserInfo, Void, Boolean> {
-//
-//        @Override
-//        protected Boolean doInBackground(UserInfo... userInfos) {
-//            if(userInfos == null || userInfos.length != 1)
-//                return null;
-//
-//            while(myService == null){
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            myService.updateInfoFieldInUsersTokens(userInfos[0]);
-//
-//	        return null;
-//        }
-//    }
-//
-//    private class SetValuesTask extends AsyncTask<Void, Void, Map<Object, Object>>{
-//
-//        @Override
-//        protected void onPreExecute() {
-//            progressBar.setVisibility(View.VISIBLE);
-//        }
-//
-//        @Override
-//        protected Map<Object, Object> doInBackground(Void... voids) {
-//            while(myService == null){
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            Map<Object, Object> map = null;
-//            if( myService.getCurrentUser().getInfo() != null){
-//                map =  myService.getCurrentUser().getInfo().mapOfUserInfo();
-//            }
-//            return map;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Map<Object, Object> map) {
-//
-//            if(map != null) {
-//                String[] split = ((String) map.get("birthdate")).split("/");
-//
-//                txtAbout.setText((String) map.get("about"));
-//                pkrHeight.setValue((int) map.get("height"));
-//                pkrWeight.setValue((int) map.get("weight"));
-//
-//                pkrDay.setValue(Integer.valueOf(split[0]));
-//                pkrMonth.setValue(Integer.valueOf(split[1]));
-//                pkrYear.setValue(Integer.valueOf(split[2]));
-//
-//                spnrEthnicity.setSelection(Integer.valueOf((String) map.get("ethnicity")));
-//                spnrRelationship.setSelection(Integer.valueOf((String) map.get("relationship")));
-//                spnrReference.setSelection(Integer.valueOf((String) map.get("reference")));
-//                spnrReligion.setSelection(Integer.valueOf((String) map.get("religion")));
-//                spnrOrientation.setSelection(Integer.valueOf((String) map.get("orientation")));
-//                spnrSTDs.setSelection(Integer.valueOf((String) map.get("STDs")));
-//                spnrRole.setSelection(Integer.valueOf((String) map.get("role")));
-//            }
-//            progressBar.setVisibility(View.GONE);
-//        }
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        if (isBound) {
-//            unbindService(serviceConnection);
-//        }
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        if (isBound) {
-//            unbindService(serviceConnection);
-//        }
-//    }
+
+    /**
+     * Creates and defines profileViewModel variable.
+     * And defines a listener for onChange() situation for getUserDistanceObject() method.
+     */
+    private void profileViewModel() {
+        profileViewModel = new ProfileViewModel(new ProfileRepository(Executors.newSingleThreadExecutor(), new Handler()));
+        profileViewModel.getUserCurrentUserObject(getSharedPreferences(SP_USERS, MODE_PRIVATE)).observe(this, new Observer<WholeCurrentUser>() {
+            @Override
+            public void onChanged(WholeCurrentUser user) {
+                if (user != null) {
+                    UserInfo info = user.getInfo();
+                    txtAbout.setText(info.getAbout());
+                    pkrHeight.setValue(info.getHeight());
+                    pkrWeight.setValue(info.getWeight());
+
+                    pkrDay.setValue(info.getBirthYearMonthDay(UserInfo.DAY));
+                    pkrMonth.setValue(info.getBirthYearMonthDay(UserInfo.MONTH));
+                    pkrYear.setValue(info.getBirthYearMonthDay(UserInfo.YEAR));
+
+                    spnrEthnicity.setSelection(UserInfo.Ethnicity.getValOf(info.getEthnicity()));
+                    spnrRelationship.setSelection(UserInfo.Relationship.getValOf(info.getRelationship()));
+                    spnrReference.setSelection(UserInfo.Reference.getValOf(info.getReference()));
+                    spnrReligion.setSelection(UserInfo.Religion.getValOf(info.getReligion()));
+                    spnrOrientation.setSelection(UserInfo.Orientation.getValOf(info.getOrientation()));
+                    spnrSTDs.setItemsSelected(UserInfo.STD.getArrayOfIntsFrom(info.getStDs().toArray(new UserInfo.STD[info.getStDs().size()])));
+                    spnrRole.setSelection(UserInfo.Role.getValOf(info.getRole()));
+                    spnrDisabilities.setItemsSelected(UserInfo.Disability.getArrayOfIntsFrom(info.getDisabilities().toArray(new UserInfo.Disability[info.getDisabilities().size()])));
+                }
+            }
+        });
+    }
 }

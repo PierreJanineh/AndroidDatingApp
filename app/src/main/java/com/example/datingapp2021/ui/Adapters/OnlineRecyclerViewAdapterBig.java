@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,19 +13,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.datingapp2021.MainActivity;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.R;
-import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
-import com.example.datingapp2021.logic.DB.SocketServer;
-import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.dashboard.DashboardFragment;
 import com.example.datingapp2021.ui.dashboard.DashboardRepository;
 import com.example.datingapp2021.ui.dashboard.DashboardViewModel;
+import com.example.datingapp2021.ui.profile.OwnProfileActivity;
 import com.example.datingapp2021.ui.profile.ProfileActivity;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,16 +36,48 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
     private List<UserDistance> users;
     private DashboardFragment fragment;
     private SharedPreferences sharedPreferences;
+    private boolean isNearby;
 
 
-    public OnlineRecyclerViewAdapterBig(DashboardFragment fragment, List<UserDistance> users, SharedPreferences sharedPreferences) {
+    public OnlineRecyclerViewAdapterBig(boolean isNearby, DashboardFragment fragment, List<UserDistance> users, SharedPreferences sharedPreferences) {
+        this.isNearby = isNearby;
         this.fragment = fragment;
-        this.users = users;
+        setList(users);
         this.sharedPreferences = sharedPreferences;
     }
 
+    /**
+     * Set users list and sort it according to distance
+     * @param users
+     * Users list
+     */
     public void setList(List<UserDistance> users){
+        if (users != null){
+            sort(users);
+        }
         this.users = users;
+    }
+
+    /**
+     * Bubble sort list according to distance variable.
+     * @param list
+     * Users list
+     */
+    public static void sort(List<UserDistance> list){
+        boolean isSorted = false;
+        int upTo = list.size() - 1;
+        while (!isSorted){
+            isSorted = true;
+            for (int i = 0; i < upTo; i++) {
+                if(list.get(i).convertDistanceToKM() > list.get(i+1).convertDistanceToKM()){
+                    UserDistance temp = list.get(i);
+                    list.set(i, list.get(i+1));
+                    list.set(i+1, temp);
+                    isSorted = false;
+                }
+            }
+            upTo--;
+        }
     }
 
     @NonNull
@@ -63,41 +90,47 @@ public class OnlineRecyclerViewAdapterBig extends RecyclerView.Adapter<OnlineRec
 
     @Override
     public void onBindViewHolder(@NotNull ViewHolder holder, final int position) {
-        if(position == 0) {
+        if (isNearby && position == 0){
             holder.cardView.setRadius(17);
-	        holder.cardView.setBackground(null);
+            holder.cardView.setBackground(null);
             holder.userName.setText(users.get(position).getSmallUser().getUsername());
             holder.distance.setText("0");
         }else{
-
-            DashboardViewModel viewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
-            viewModel.getImageDrawableFromURL(users.get(position).getSmallUser().getImg_url()).observe(fragment, new Observer<Drawable>() {
-                @Override
-                public void onChanged(Drawable drawable) {
-                    holder.cardView.setBackground(drawable);
-                }
-            });
-
-//            holder.cardView.setBackgroundResource(R.drawable.ic_launcher_background);
             holder.userName.setText(users.get(position).getSmallUser().getUsername());
             holder.distance.setText(users.get(position).convertDistanceToKM()+"");
         }
+        getImageDrawable(holder, position);
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: clicked on: ");
                 Intent intent;
-                if(position == 0){
-//                    intent = new Intent(mContext, OwnProfileActivity.class);
-//                    mContext.startActivity(intent);
+                if(position == 0 && isNearby){
+                    intent = new Intent(fragment.getContext(), OwnProfileActivity.class);
                 }else {
                     intent = new Intent(fragment.getContext(), ProfileActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putInt("uid", users.get(position).getSmallUser().getUid());
                     intent.putExtras(bundle);
-                    fragment.startActivity(intent);
                 }
+                fragment.startActivity(intent);
+            }
+        });
+    }
+
+    /**
+     * Get profile image using http connection in background using view model. And sets cardView.setBackground() on onChange() observer method.
+     * @param holder
+     * View holder.
+     * @param position
+     * View position.
+     */
+    private void getImageDrawable(@NotNull ViewHolder holder, int position) {
+        DashboardViewModel viewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
+        viewModel.getImageDrawableFromURL(users.get(position).getSmallUser().getImg_url()).observe(fragment, new Observer<Drawable>() {
+            @Override
+            public void onChanged(Drawable drawable) {
+                holder.cardView.setBackground(drawable);
             }
         });
     }

@@ -33,7 +33,6 @@ import com.r0adkll.slidr.model.SlidrListener;
 
 import java.util.concurrent.Executors;
 
-import static com.example.datingapp2021.logic.DB.SocketServer.SP_UID;
 import static com.example.datingapp2021.logic.DB.SocketServer.SP_USERS;
 
 public class ProfileActivity extends AppCompatActivity implements LifecycleOwner {
@@ -97,7 +96,7 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
                     currentWholeUser.observe(ProfileActivity.this, new Observer<WholeCurrentUser>() {
                         @Override
                         public void onChanged(WholeCurrentUser wholeCurrentUser) {
-                            checkIfUidIsFavOrMine();
+                            checkIfUidIsFav();
                         }
                     });
                     service.currentUser.observe(ProfileActivity.this, new Observer<WholeCurrentUser>() {
@@ -236,12 +235,9 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     /**
      * Checks if the Activity's bundle extras uid equals to the current user's uid, else if the uid is in current user's favs list it assigns favBtn state as selected.
      */
-    private void checkIfUidIsFavOrMine() {
+    private void checkIfUidIsFav() {
         if (currentWholeUser.getValue() != null) {
-            if (currentWholeUser.getValue().getUid() == otherUid) {
-                favBtn.setVisibility(View.GONE);
-                isFav.setValue(false);
-            } else if (currentWholeUser.getValue().getFavs().contains(otherUid)) {
+            if (currentWholeUser.getValue().getFavs().contains(otherUid)) {
                 favBtn.setSelected(true);
                 isFav.setValue(true);
             }else {

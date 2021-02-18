@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 
 import com.example.datingapp2021.logic.Classes.UserDistance;
+import com.example.datingapp2021.logic.Classes.UserInfo;
+import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
 
@@ -16,6 +18,15 @@ public class ProfileRepository {
     public ProfileRepository(Executor executor, Handler handler){
         this.executor = executor;
         this.handler = handler;
+    }
+
+    private void notifyCurrentUserResult(final Result<WholeCurrentUser> result, final Callback<WholeCurrentUser> callback){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onComplete(result);
+            }
+        });
     }
 
     private void notifyResult(final Result<UserDistance> result, final Callback<UserDistance> callback){
@@ -32,6 +43,34 @@ public class ProfileRepository {
             @Override
             public void run() {
                 callback.onComplete(result);
+            }
+        });
+    }
+
+    public void editCurrentUser(SharedPreferences sharedPreferences, UserInfo userInfo, Callback<Boolean> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    notifyBoolResult(makeSynchronousEditCurrentUser(sharedPreferences, userInfo), callback);
+                }catch (Exception e){
+                    Result<Boolean> errorResult = new Result.Error<>(e);
+                    notifyBoolResult(errorResult, callback);
+                }
+            }
+        });
+    }
+
+    public void getCurrentUser(SharedPreferences sharedPreferences, Callback<WholeCurrentUser> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    notifyCurrentUserResult(makeSynchronousGetCurrentUser(sharedPreferences), callback);
+                }catch (Exception e){
+                    Result<WholeCurrentUser> errorResult = new Result.Error<>(e);
+                    notifyCurrentUserResult(errorResult, callback);
+                }
             }
         });
     }
@@ -76,6 +115,24 @@ public class ProfileRepository {
                 }
             }
         });
+    }
+
+    public Result<Boolean> makeSynchronousEditCurrentUser(SharedPreferences sharedPreferences, UserInfo userInfo) {
+        Boolean result = SocketServer.updateUserInfo(SocketServer.getCurrentUserFrom(sharedPreferences), userInfo);
+        if (result == null) {
+            return new Result.SuccessNULL<>("null object received");
+        }else {
+            return new Result.Success<>(result);
+        }
+    }
+
+    public Result<WholeCurrentUser> makeSynchronousGetCurrentUser(SharedPreferences sharedPreferences) {
+        WholeCurrentUser result = SocketServer.getCurrentUser(SocketServer.getCurrentUserFrom(sharedPreferences));
+        if (result == null) {
+            return new Result.SuccessNULL<>("null object received");
+        }else {
+            return new Result.Success<>(result);
+        }
     }
 
     public Result<UserDistance> makeSynchronousGetUserInfo(SharedPreferences sharedPreferences, int uid) {

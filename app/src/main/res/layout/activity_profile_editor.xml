@@ -191,7 +191,7 @@
                 android:padding="10dp"
                 android:text="Reference:" />
 
-            <com.example.datingapp2021.ui.SpecialViews.MultiSpinner
+            <Spinner
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"
@@ -204,7 +204,7 @@
                 android:padding="10dp"
                 android:text="STDs:" />
 
-            <Spinner
+            <com.example.datingapp2021.ui.SpecialViews.MultiSpinner
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"

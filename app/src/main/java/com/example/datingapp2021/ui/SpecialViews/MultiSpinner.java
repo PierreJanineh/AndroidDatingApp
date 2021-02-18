@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AlertDialog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,15 +87,30 @@ public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner imp
         this.arrayResId = textArrayResId;
         this.items = items;
         this.listener = listener;
-
-//        // all selected by default
-//        selected = new boolean[items.size()];
-//        for (int i = 0; i < selected.length; i++)
-//            selected[i] = true;
-
         // all text on the spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), textArrayResId, textViewResId);
         setAdapter(adapter);
+    }
+
+    public void setItemsSelected(ArrayList<Integer> ints){
+        if (ints.size() == 0){
+            selected = new boolean[items.size()];
+            return;
+        }
+        selected = new boolean[items.size()];
+        boolean needsToLoop = false;
+        for (int i = 0; i < selected.length; i++){
+            if (i == ints.get(i)){
+                selected[i] = true;
+                ints.remove(i);
+                if (ints.size() > 0)
+                    needsToLoop = true;
+                break;
+            }
+        }
+        while (needsToLoop){
+            setItemsSelected(ints);
+        }
     }
 
     public interface MultiSpinnerListener {

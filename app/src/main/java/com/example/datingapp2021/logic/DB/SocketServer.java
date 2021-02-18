@@ -56,6 +56,7 @@ public class SocketServer {
     /*SHARED_PREFERENCES*/
     public static final String SP_USERS = "users";
     public static final String SP_UID = "uid";
+    public static final int DONE = 1000;
 
     private static WholeCurrentUser wholeCurrentUser;
 
@@ -197,13 +198,10 @@ public class SocketServer {
 
             return UserDistance.readUsers(inputStream);
         } catch (UnknownHostException e) {
-            Log.d("makeSynchronous1", e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            Log.d("makeSynchronous2", e.getMessage());
             e.printStackTrace();
         } catch (Exception e) {
-            Log.d("makeSynchronous", "exception: " + e.getClass().getName());
             e.printStackTrace();
         } finally {
             if (socket != null) {
@@ -701,7 +699,7 @@ public class SocketServer {
      * @param userInfo
      * Updated UserInfo Object.
      */
-    public static void updateUserInfo(int uid, UserInfo userInfo){
+    public static boolean updateUserInfo(int uid, UserInfo userInfo){
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -713,6 +711,9 @@ public class SocketServer {
             outputStream.write(UPDATE_USERINFO);
             outputStream.write(uid);
             userInfo.write(outputStream);
+
+            int status = inputStream.read();
+            return status == OKAY;
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -740,6 +741,7 @@ public class SocketServer {
                 }
             }
         }
+        return false;
     }
 
     /**

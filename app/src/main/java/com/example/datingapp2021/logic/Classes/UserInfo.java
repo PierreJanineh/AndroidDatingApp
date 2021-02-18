@@ -7,19 +7,24 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.example.datingapp2021.logic.Classes.WholeUser.INFO;
+import static java.util.Calendar.ALL_STYLES;
 import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 
@@ -56,6 +61,9 @@ public class UserInfo {
     public static final String ROLE = "role";
     public static final String DISABILITIES = "disabilities";
     public static final String UID = "uid";
+    public static final int YEAR = 100;
+    public static final int MONTH = 200;
+    public static final int DAY = 300;
     private int uid;
     private String about;
     private int weight, height;
@@ -186,13 +194,13 @@ public class UserInfo {
 
         Calendar today = Calendar.getInstance();
         today.setTimeInMillis(new Date().getTime());
-        int todaysYear = today.get(YEAR);
-        int todaysMonth = today.get(MONTH);
+        int todaysYear = today.get(Calendar.YEAR);
+        int todaysMonth = today.get(Calendar.MONTH);
         int todaysDay = today.get(DAY_OF_MONTH);
         Calendar birth = Calendar.getInstance();
         birth.setTimeInMillis(birthDate.getTime());
-        int birthYear = birth.get(YEAR);
-        int birthMonth = birth.get(MONTH);
+        int birthYear = birth.get(Calendar.YEAR);
+        int birthMonth = birth.get(Calendar.MONTH);
         int birthDay = birth.get(DAY_OF_MONTH);
 
         int age = (todaysYear-birthYear)-1;
@@ -205,6 +213,28 @@ public class UserInfo {
         }
 
         return age;
+    }
+
+    /**
+     * Get Year or Month or Day in String from birthdate.
+     * @param yearMonthDay
+     * 100-YEAR | 200-MONTH | 300-DAY
+     * @return
+     * String Day or Month or Year
+     */
+    public int getBirthYearMonthDay(int yearMonthDay){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(birthDate);
+        System.out.println(birthDate);
+        switch (yearMonthDay){
+            case YEAR:
+                return calendar.get(Calendar.YEAR);
+            case MONTH:
+                return calendar.get(Calendar.MONTH)+1;
+            case DAY:
+                return calendar.get(DAY_OF_MONTH);
+        }
+        return 0;
     }
 
     /**
@@ -334,24 +364,6 @@ public class UserInfo {
 
     public void setDisabilities(ArrayList<Disability> disabilities) {
         this.disabilities = disabilities;
-    }
-
-    public Map<Object, Object> mapOfUserInfo(){
-        Map<Object,Object> map = new HashMap<>();
-        map.put("userId", uid);
-        map.put("about", about);
-        map.put("height", height);
-        map.put("weight", weight);
-        map.put("birthdate", birthDate);
-        map.put("relationship", relationship);
-        map.put("religion", religion);
-        map.put("orientation", orientation);
-        map.put("ethnicity", ethnicity);
-        map.put("reference", reference);
-        map.put("STDs", stDs);
-        map.put("role", role);
-        map.put("disabilities", disabilities);
-        return map;
     }
 
     public enum Relationship {
@@ -527,6 +539,14 @@ public class UserInfo {
             return stds;
         }
 
+        static public ArrayList<Integer> getArrayOfIntsFrom(STD[] values) {
+            ArrayList<Integer> stds = new ArrayList<>();
+            for (STD val : values) {
+                stds.add(getValOf(val));
+            }
+            return stds;
+        }
+
         static public int getValOf(STD enumObj){
             switch (enumObj){
                 case NO_STDS:
@@ -607,6 +627,14 @@ public class UserInfo {
                 disabilities.add(getEnumValOf(code));
             }
             return disabilities;
+        }
+
+        static public ArrayList<Integer> getArrayOfIntsFrom(Disability[] values) {
+            ArrayList<Integer> stds = new ArrayList<>();
+            for (Disability val : values) {
+                stds.add(getValOf(val));
+            }
+            return stds;
         }
 
         static public ArrayList<Disability> getArrayOfEnumsFrom(String[] values) {
