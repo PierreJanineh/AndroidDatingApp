@@ -1,12 +1,8 @@
 package com.example.datingapp2021.ui.favourites;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +20,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.datingapp2021.databinding.FragmentFavouritesBinding;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.NearbyUsersRecyclerViewAdapter;
 import com.example.datingapp2021.ui.dashboard.DashboardRepository;
 import com.example.datingapp2021.ui.dashboard.DashboardViewModel;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
