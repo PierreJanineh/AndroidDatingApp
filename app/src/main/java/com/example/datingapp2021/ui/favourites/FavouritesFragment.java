@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.datingapp2021.databinding.FragmentFavouritesBinding;
 import com.example.datingapp2021.logic.Classes.UserDistance;
@@ -53,6 +54,7 @@ public class FavouritesFragment extends Fragment {
         TextView textView = binding.noFavsLbl;
         final ProgressBar progressBar = binding.progress;
         final RecyclerView recyclerView = binding.recyclerView;
+        final SwipeRefreshLayout swipeLayout = binding.swipeLayout;
 
         NearbyUsersRecyclerViewAdapter nearbyUsersRecyclerViewAdapter = new NearbyUsersRecyclerViewAdapter(false, this, users);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
@@ -67,10 +69,19 @@ public class FavouritesFragment extends Fragment {
                     nearbyUsersRecyclerViewAdapter.setList(users);
                     textView.setVisibility(View.GONE);
                 }else {
-                    Toast.makeText(getContext(), "No Favourite users found.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "No Favourite users found.", Toast.LENGTH_SHORT).show();
                     textView.setVisibility(View.VISIBLE);
+                    nearbyUsersRecyclerViewAdapter.setList(new ArrayList<>());
                 }
                 progressBar.setVisibility(View.GONE);
+                swipeLayout.setRefreshing(false);
+            }
+        });
+
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                dashboardViewModel.getFavouriteUsers(uid);
             }
         });
 

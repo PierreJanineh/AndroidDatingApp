@@ -1,22 +1,16 @@
 package com.example.datingapp2021.ui.dashboard;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -27,10 +21,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.datingapp2021.databinding.FragmentDashboardBinding;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.NearbyUsersRecyclerViewAdapter;
 import com.example.datingapp2021.ui.Adapters.NewUsersRecyclerViewAdapter;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +97,8 @@ public class DashboardFragment extends Fragment {
                     newList.addAll(list);
                     newUsersAdapter.setList(newList);
                 }else {
-                    Snackbar.make(getContext(), getView(), "No new users at all baby", 10000).show();
+                    newUsersAdapter.setList(new ArrayList<>());
+                    Toast.makeText(getContext(), "No new users at all baby", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -124,9 +117,10 @@ public class DashboardFragment extends Fragment {
                     onlinePB.setVisibility(View.INVISIBLE);
                     refreshLayout.setRefreshing(false);
                 }else {
+                    nearbyUsersAdapter.setList(new ArrayList<>());
                     onlinePB.setVisibility(View.INVISIBLE);
                     refreshLayout.setRefreshing(false);
-                    Snackbar.make(getContext(), getView(), "No nearby users at all baby", 20000).show();
+                    Toast.makeText(getContext(), "No nearby users at all baby", Toast.LENGTH_SHORT).show();
                 }
             }
         });
