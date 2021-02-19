@@ -43,6 +43,20 @@ public class DashboardRepository {
         });
     }
 
+    public void getFavouriteUsers(int uid, Callback<List<UserDistance>> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    notifyResult(makeSynchronousGetFavouriteUsers(uid), callback);
+                }catch (Exception e){
+                    Result<List<UserDistance>> errorResult = new Result.Error<>(e);
+                    notifyResult(errorResult, callback);
+                }
+            }
+        });
+    }
+
     public void getNearbyUsers(int uid, Callback<List<UserDistance>> callback) {
         executor.execute(new Runnable() {
             @Override
@@ -84,6 +98,15 @@ public class DashboardRepository {
 
             }
         });
+    }
+
+    public Result<List<UserDistance>> makeSynchronousGetFavouriteUsers(int uid) {
+        List<UserDistance> result = SocketServer.getFavouriteUsers(uid);
+        if (result == null) {
+            return new Result.SuccessNULL<>("null object received");
+        }else {
+            return new Result.Success<>(result);
+        }
     }
 
     public Result<List<UserDistance>> makeSynchronousGetNearbyUsers(int uid) {

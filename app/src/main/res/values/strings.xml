@@ -16,4 +16,7 @@
     <string name="on_messages">on messages</string>
     <string name="on_profile_views">on profile views</string>
     <string name="privacy">Privacy</string>
+
+    <!-- FAVOURITES FRAGMENT -->
+    <string name="no_favourites">No favourite users have been added.</string>
 </resources>

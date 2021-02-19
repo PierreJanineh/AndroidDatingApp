@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SocketServer {
-    public static final String HOST = "192.168.1.218";
+    public static final String HOST = "192.168.1.224";
     public static final int PORT = 3000;
 
     /*MESSAGE*/

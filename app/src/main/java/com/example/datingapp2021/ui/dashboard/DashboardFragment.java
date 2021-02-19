@@ -2,20 +2,21 @@ package com.example.datingapp2021.ui.dashboard;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -27,7 +28,8 @@ import com.example.datingapp2021.databinding.FragmentDashboardBinding;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.logic.Service.MainService;
-import com.example.datingapp2021.ui.Adapters.OnlineRecyclerViewAdapterBig;
+import com.example.datingapp2021.ui.Adapters.NearbyUsersRecyclerViewAdapter;
+import com.example.datingapp2021.ui.Adapters.NewUsersRecyclerViewAdapter;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -46,26 +48,6 @@ public class DashboardFragment extends Fragment {
 
     private int uid;
 
-    public MainService service;
-    public boolean bound;
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            MainService.MainBinder binder = (MainService.MainBinder) iBinder;
-            service = binder.getService();
-            bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-    };
-
-
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
@@ -78,9 +60,8 @@ public class DashboardFragment extends Fragment {
         onlinePB = binding.onlinePB;
         refreshLayout = binding.refreshLO;
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE);
-        OnlineRecyclerViewAdapterBig newUsersAdapter = new OnlineRecyclerViewAdapterBig(false, this, nearbyList, sharedPreferences);
-        OnlineRecyclerViewAdapterBig nearbyUsersAdapter = new OnlineRecyclerViewAdapterBig(true, this, newList, sharedPreferences);
+        NewUsersRecyclerViewAdapter newUsersAdapter = new NewUsersRecyclerViewAdapter( this, nearbyList);
+        NearbyUsersRecyclerViewAdapter nearbyUsersAdapter = new NearbyUsersRecyclerViewAdapter(true, this, newList);
         LinearLayoutManager newUsersManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         GridLayoutManager nearbyUsersManager = new GridLayoutManager(getContext(), 3);
         newRV.setAdapter(newUsersAdapter);
@@ -113,14 +94,7 @@ public class DashboardFragment extends Fragment {
         return root;
     }
 
-    private void ifBoundUnbind(){
-        if (bound) {
-            getActivity().unbindService(serviceConnection);
-            bound = false;
-        }
-    }
-
-    private void getNewUsers(OnlineRecyclerViewAdapterBig newUsersAdapter) {
+    private void getNewUsers(NewUsersRecyclerViewAdapter newUsersAdapter) {
         dashboardViewModel.getNewList(uid).observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
@@ -130,7 +104,6 @@ public class DashboardFragment extends Fragment {
                     }
                     newList.addAll(list);
                     newUsersAdapter.setList(newList);
-                    newUsersAdapter.notifyDataSetChanged();
                 }else {
                     Snackbar.make(getContext(), getView(), "No new users at all baby", 10000).show();
                 }
@@ -138,7 +111,7 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    private void getNearbyUsers(OnlineRecyclerViewAdapterBig nearbyUsersAdapter) {
+    private void getNearbyUsers(NearbyUsersRecyclerViewAdapter nearbyUsersAdapter) {
         dashboardViewModel.getNearbyList(uid).observe(getViewLifecycleOwner(), new Observer<List<UserDistance>>() {
             @Override
             public void onChanged(@Nullable List<UserDistance> list) {
@@ -148,7 +121,6 @@ public class DashboardFragment extends Fragment {
                     }
                     nearbyList.addAll(list);
                     nearbyUsersAdapter.setList(nearbyList);
-                    nearbyUsersAdapter.notifyDataSetChanged();
                     onlinePB.setVisibility(View.INVISIBLE);
                     refreshLayout.setRefreshing(false);
                 }else {

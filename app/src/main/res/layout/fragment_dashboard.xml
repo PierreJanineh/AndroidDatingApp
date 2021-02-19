@@ -6,76 +6,75 @@
     android:layout_height="match_parent"
     tools:context=".ui.dashboard.DashboardFragment"
     android:id="@+id/refreshLO">
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fillViewport="true"
-        android:scrollbars="vertical">
-        <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="vertical">
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:paddingStart="@dimen/tenDp"
-                android:paddingEnd="@dimen/tenDp"
-                android:paddingTop="@dimen/fiveDp"
-                android:paddingBottom="@dimen/tenDp"
-                android:text="New hotties"
-                android:id="@+id/newGuys"/>
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/newGuys"
-                android:paddingStart="@dimen/fiveDp"
-                android:paddingEnd="@dimen/zeroDp"
-                android:paddingRight="@dimen/fiveDp"
-                android:paddingLeft="@dimen/zeroDp"
-                android:paddingTop="@dimen/zeroDp"
-                android:paddingBottom="@dimen/fiveDp"
-                app:layout_editor_absoluteY="19dp"
-                android:id="@+id/horScroll">
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:paddingStart="@dimen/tenDp"
+                    android:paddingEnd="@dimen/tenDp"
+                    android:paddingTop="@dimen/fiveDp"
+                    android:paddingBottom="@dimen/tenDp"
+                    android:text="New hotties"
+                    android:id="@+id/newGuys"/>
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/newGuys"
+                    android:paddingStart="@dimen/fiveDp"
+                    android:paddingEnd="@dimen/zeroDp"
+                    android:paddingRight="@dimen/fiveDp"
+                    android:paddingLeft="@dimen/zeroDp"
+                    android:paddingTop="@dimen/zeroDp"
+                    android:paddingBottom="@dimen/fiveDp"
+                    app:layout_editor_absoluteY="19dp"
+                    android:id="@+id/horScroll">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/newRV">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+                </HorizontalScrollView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/horScroll"
+                    android:paddingStart="@dimen/tenDp"
+                    android:paddingEnd="@dimen/tenDp"
+                    android:paddingTop="@dimen/tenDp"
+                    android:paddingBottom="@dimen/tenDp"
+                    android:text="Online"
+                    android:id="@+id/onlineTxt"/>
                 <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/newRV">
+                    app:layout_constraintTop_toBottomOf="@id/onlineTxt"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/onlineRV">
 
                 </androidx.recyclerview.widget.RecyclerView>
-            </HorizontalScrollView>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/horScroll"
-                android:paddingStart="@dimen/tenDp"
-                android:paddingEnd="@dimen/tenDp"
-                android:paddingTop="@dimen/tenDp"
-                android:paddingBottom="@dimen/tenDp"
-                android:text="Online"
-                android:id="@+id/onlineTxt"/>
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/onlineTxt"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:id="@+id/onlineRV">
-
-            </androidx.recyclerview.widget.RecyclerView>
-
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="@id/onlineRV"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:id="@+id/onlinePB"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="@id/onlineRV"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/onlinePB"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

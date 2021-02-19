@@ -2,8 +2,6 @@ package com.example.datingapp2021.ui.dashboard;
 
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.telecom.Call;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -17,6 +15,7 @@ import java.util.concurrent.Executors;
 
 public class DashboardViewModel extends ViewModel {
 
+    private MutableLiveData<List<UserDistance>> favouriteUsers;
     private MutableLiveData<List<UserDistance>> newUsers;
     private MutableLiveData<List<UserDistance>> nearbyUsers;
     private MutableLiveData<Drawable> image;
@@ -25,6 +24,7 @@ public class DashboardViewModel extends ViewModel {
     public boolean newIsNull = true;
 
     public DashboardViewModel() {
+        favouriteUsers = new MutableLiveData<>();
         nearbyUsers = new MutableLiveData<>();
         newUsers = new MutableLiveData<>();
         image = new MutableLiveData<>();
@@ -32,10 +32,26 @@ public class DashboardViewModel extends ViewModel {
     }
 
     public DashboardViewModel(DashboardRepository repository) {
+        favouriteUsers = new MutableLiveData<>();
         nearbyUsers = new MutableLiveData<>();
         newUsers = new MutableLiveData<>();
         image = new MutableLiveData<>();
         this.repository = repository;
+    }
+
+    public void getFavouriteUsers(int uid){
+        repository.getFavouriteUsers(uid, new Callback<List<UserDistance>>() {
+            @Override
+            public void onComplete(Result<List<UserDistance>> result) {
+                if (result instanceof Result.Success) {
+                    favouriteUsers.setValue(((Result.Success<List<UserDistance>>) result).data);
+                }else {
+                    favouriteUsers.setValue(null);
+                    favouriteUsers.postValue(null);
+                    //TODO show error in UI
+                }
+            }
+        });
     }
 
     public void getNearbyUsers(int uid){
@@ -92,6 +108,11 @@ public class DashboardViewModel extends ViewModel {
                 }
             }
         });
+    }
+
+    public LiveData<List<UserDistance>> getFavouriteUsersList(int uid){
+        getFavouriteUsers(uid);
+        return favouriteUsers;
     }
 
     public LiveData<Drawable> getImageDrawableFromURL(String url){

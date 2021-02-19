@@ -1,25 +1,19 @@
 package com.example.datingapp2021.ui.profile;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.datingapp2021.R;
 import com.example.datingapp2021.logic.Classes.Image;
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.ProfileImagesViewPagerAdapter;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
