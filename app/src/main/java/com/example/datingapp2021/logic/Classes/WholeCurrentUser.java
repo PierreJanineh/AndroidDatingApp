@@ -118,7 +118,6 @@ public class WholeCurrentUser {
 
         this.favs = favsArr;
         ArrayList<Room> rooms = null;
-        System.out.println("Object = "+object);
         if (object.has(CHAT_ROOMS)){
             jsonArray = object.get(CHAT_ROOMS).getAsJsonArray();
             rooms = new ArrayList<>();

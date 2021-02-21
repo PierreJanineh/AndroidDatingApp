@@ -30,15 +30,19 @@
         </activity>
         <activity
             android:name=".ui.profile.OwnProfileActivity"
-            android:label="@string/profile_editor">
+            android:label="@string/profile">
         </activity>
         <activity
             android:name=".ui.profile.SettingsActivity"
-            android:label="@string/profile_editor">
+            android:label="@string/profile_settings">
         </activity>
         <activity
             android:name=".ui.profile.ProfileEditorActivity"
             android:label="@string/profile_editor">
+        </activity>
+        <activity
+            android:name=".ui.chat.ChatActivity"
+            android:label="@string/chat">
         </activity>
     </application>
 

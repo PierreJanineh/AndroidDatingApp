@@ -10,7 +10,6 @@ import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
@@ -153,7 +152,7 @@ public class ProfileRepository {
     }
 
     public Result<Boolean> makeSynchronousEditCurrentUser(SharedPreferences sharedPreferences, UserInfo userInfo) {
-        Boolean result = SocketServer.updateUserInfo(SocketServer.getCurrentUserFrom(sharedPreferences), userInfo);
+        Boolean result = SocketServer.updateUserInfo(SocketServer.getCurrentUserUID(sharedPreferences), userInfo);
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {
@@ -162,7 +161,7 @@ public class ProfileRepository {
     }
 
     public Result<WholeCurrentUser> makeSynchronousGetCurrentUser(SharedPreferences sharedPreferences) {
-        WholeCurrentUser result = SocketServer.getCurrentUser(SocketServer.getCurrentUserFrom(sharedPreferences));
+        WholeCurrentUser result = SocketServer.getCurrentUser(SocketServer.getCurrentUserUID(sharedPreferences));
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {
@@ -171,7 +170,7 @@ public class ProfileRepository {
     }
 
     public Result<UserDistance> makeSynchronousGetUserInfo(SharedPreferences sharedPreferences, int uid) {
-        UserDistance result = SocketServer.getWholeUserDistance(SocketServer.getCurrentUserFrom(sharedPreferences), uid);
+        UserDistance result = SocketServer.getWholeUserDistance(SocketServer.getCurrentUserUID(sharedPreferences), uid);
         if (result == null) {
             return new Result.SuccessNULL<>("null object received");
         }else {
@@ -180,10 +179,10 @@ public class ProfileRepository {
     }
 
     public Result<Boolean> makeSynchronousAddToFavourites(SharedPreferences sharedPreferences, int uid) {
-        return new Result.Success<>(SocketServer.addFavouriteUser(SocketServer.getCurrentUserFrom(sharedPreferences), uid));
+        return new Result.Success<>(SocketServer.addFavouriteUser(SocketServer.getCurrentUserUID(sharedPreferences), uid));
     }
 
     public Result<Boolean> makeSynchronousRemoveFromFavourites(SharedPreferences sharedPreferences, int uid) {
-        return new Result.Success<>(SocketServer.removeFavouriteUser(SocketServer.getCurrentUserFrom(sharedPreferences), uid));
+        return new Result.Success<>(SocketServer.removeFavouriteUser(SocketServer.getCurrentUserUID(sharedPreferences), uid));
     }
 }

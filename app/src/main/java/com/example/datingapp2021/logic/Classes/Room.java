@@ -36,8 +36,7 @@ public class Room {
     private ArrayList<Integer> recipients;
     private Message lastMessage;
 
-    public Room(int uid, ArrayList<Integer> seenBy, ArrayList<Integer> messages, ArrayList<Integer> recipients, Message lastMessage) {
-        this.uid = uid;
+    public Room(ArrayList<Integer> seenBy, ArrayList<Integer> messages, ArrayList<Integer> recipients, Message lastMessage) {
         this.seenBy = seenBy;
         this.messages = messages;
         this.recipients = recipients;
@@ -64,6 +63,7 @@ public class Room {
         }
         if (jsonObject.has(MESSAGES) && !jsonObject.getAsJsonArray(MESSAGES).isJsonNull()) {
             jArr = jsonObject.get(MESSAGES).getAsJsonArray();
+            arr = new ArrayList<>();
             for (JsonElement element : jArr) {
                 arr.add(element.getAsInt());
             }
@@ -73,6 +73,7 @@ public class Room {
         }
         if (jsonObject.has(RECIPIENTS) && !jsonObject.getAsJsonArray(RECIPIENTS).isJsonNull()) {
             jArr = jsonObject.get(RECIPIENTS).getAsJsonArray();
+            arr = new ArrayList<>();
             for (JsonElement element : jArr) {
                 arr.add(element.getAsInt());
             }

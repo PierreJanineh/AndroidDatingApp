@@ -38,8 +38,7 @@ public class Message {
     private Timestamp timestamp;
     private boolean isItFromMe;
 
-    public Message(int uid, String content, Timestamp timestamp, SmallUser to, SmallUser from) {
-        this.uid = uid;
+    public Message(String content, Timestamp timestamp, SmallUser to, SmallUser from) {
         this.content = content;
         this.timestamp = timestamp;
         this.to = to;

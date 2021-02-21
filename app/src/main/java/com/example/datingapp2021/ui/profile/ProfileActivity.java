@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.datingapp2021.R;
@@ -27,6 +26,7 @@ import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.logic.Service.MainService;
 import com.example.datingapp2021.ui.Adapters.ProfileImagesViewPagerAdapter;
+import com.example.datingapp2021.ui.chat.ChatActivity;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.r0adkll.slidr.Slidr;
@@ -123,7 +123,7 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         otherUid = bundle.getInt("uid");
 
         SharedPreferences sharedPreferences = getSharedPreferences(SP_USERS, MODE_PRIVATE);
-        uid = SocketServer.getCurrentUserFrom(sharedPreferences);
+        uid = SocketServer.getCurrentUserUID(sharedPreferences);
 
         Intent intent = new Intent(this, MainService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -315,12 +315,12 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         }
     }
 
-//    public void openChat(View view) {
-//        Intent intent = new Intent(this, ChatActivity.class);
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable("other_user", myCurrentUser);
-//        intent.putExtras(bundle);
-//        startActivity(intent);
-//    }
+    public void openChat(View view) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("uid", otherUid);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
 
 }

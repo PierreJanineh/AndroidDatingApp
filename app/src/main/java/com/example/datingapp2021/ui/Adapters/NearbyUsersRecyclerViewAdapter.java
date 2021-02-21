@@ -140,13 +140,11 @@ public class NearbyUsersRecyclerViewAdapter extends RecyclerView.Adapter<NearbyU
 
     @Override
     public void onViewAttachedToWindow(@NonNull @NotNull ViewHolder holder) {
-        System.out.println("view attached to window: "+holder.userName.getText());
         super.onViewAttachedToWindow(holder);
     }
 
     @Override
     public void onViewRecycled(@NonNull @NotNull ViewHolder holder) {
-        System.out.println("view attached to window: "+holder.userName.getText());
         super.onViewRecycled(holder);
     }
 

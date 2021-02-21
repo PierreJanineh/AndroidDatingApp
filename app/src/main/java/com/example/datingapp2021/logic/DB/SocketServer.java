@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SocketServer {
-    public static final String HOST = "192.168.1.224";
+    public static final String HOST = "192.168.1.217";
     public static final int PORT = 3000;
 
     /*MESSAGE*/
@@ -80,7 +80,7 @@ public class SocketServer {
         return buffer.toString();
     }
 
-    public static int getCurrentUserFrom(SharedPreferences sharedPreferences) {
+    public static int getCurrentUserUID(SharedPreferences sharedPreferences) {
 //        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         int uid = sharedPreferences.getInt(SP_UID, 0);
         //if user is not in Shared preference, create one with uid = 3
@@ -135,7 +135,14 @@ public class SocketServer {
         return null;
     }
 
-    public static boolean sendMessage(String messageJson){
+    /**
+     * Send a message by sending a Room object containing last message.
+     * @param roomJson
+     * Room JsonObject.
+     * @return
+     * boolean true if succeeded, false if message already exists.
+     */
+    public static int sendMessage(String roomJson){
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -145,15 +152,11 @@ public class SocketServer {
             outputStream = socket.getOutputStream();
 
             outputStream.write(SEND_MESSAGE);
-//            outputStream.write(SocketServer.getCurrentUser().getUid()); TODO
-
-            byte[] messageBytes = messageJson.getBytes();
+            byte[] messageBytes = roomJson.getBytes();
             outputStream.write(messageBytes.length);
             outputStream.write(messageBytes);
-            int response = inputStream.read();
-            if(response == OKAY){
-                return true;
-            }
+            int roomUID = inputStream.read();
+            return roomUID;
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -181,9 +184,16 @@ public class SocketServer {
                 }
             }
         }
-        return false;
+        return 0;
     }
 
+    /**
+     * Get user Profile images from DB.
+     * @param uid
+     * User uid int.
+     * @return
+     * ArrayList of Image.
+     */
     public static ArrayList<Image> getImages(int uid){
         Socket socket = null;
         InputStream inputStream = null;
@@ -230,6 +240,13 @@ public class SocketServer {
         return null;
     }
 
+    /**
+     * Get nearby Users as UserDistance.
+     * @param uid
+     * int current uid to get distance from.
+     * @return
+     * List of UserDistance.
+     */
     public static List<UserDistance> getNearbyUsers(int uid){
 
 

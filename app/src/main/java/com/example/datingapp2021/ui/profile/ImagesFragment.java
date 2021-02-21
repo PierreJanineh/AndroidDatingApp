@@ -47,7 +47,6 @@ public class ImagesFragment extends Fragment {
         viewModel.getImageDrawableFromURL(imgUrl).observe(getViewLifecycleOwner(), new Observer<Drawable>() {
             @Override
             public void onChanged(Drawable drawable) {
-                System.out.println("got image");
                 ImagesFragment.this.imageView.setImageDrawable(drawable);
             }
         });

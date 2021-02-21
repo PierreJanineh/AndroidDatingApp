@@ -63,13 +63,12 @@ public class DashboardFragment extends Fragment {
         onlineRV.getAdapter().registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                System.out.println("item changed");
                 super.onItemRangeChanged(positionStart, itemCount);
             }
         });
         onlineRV.setLayoutManager(nearbyUsersManager);
 
-        uid = SocketServer.getCurrentUserFrom(getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
+        uid = SocketServer.getCurrentUserUID(getActivity().getSharedPreferences(SocketServer.SP_USERS, Context.MODE_PRIVATE));
         getNewUsers(newUsersAdapter);
 
         getNearbyUsers(nearbyUsersAdapter);

@@ -41,7 +41,7 @@ public class FavouritesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel = new DashboardViewModel(new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler()));
-        uid = SocketServer.getCurrentUserFrom(getActivity().getSharedPreferences(SP_USERS, Context.MODE_PRIVATE));
+        uid = SocketServer.getCurrentUserUID(getActivity().getSharedPreferences(SP_USERS, Context.MODE_PRIVATE));
 
         binding = FragmentFavouritesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();

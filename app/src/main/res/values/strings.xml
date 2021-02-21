@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">DatingApp2021</string>
-    <string name="title_favourites">Favourites</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_chat">Chat</string>
 
     <string name="profile">Profile</string>
     <string name="profile_editor">Profile Editor</string>
+    <string name="chat">Chat</string>
 
     <!-- SETTINGS ACTIVITY -->
+    <string name="profile_settings">Profile Settings</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
     <string name="show_age">Show age</string>
@@ -19,5 +20,6 @@
     <string name="privacy">Privacy</string>
 
     <!-- FAVOURITES FRAGMENT -->
+    <string name="title_favourites">Favourites</string>
     <string name="no_favourites">No favourite users have been added.</string>
 </resources>

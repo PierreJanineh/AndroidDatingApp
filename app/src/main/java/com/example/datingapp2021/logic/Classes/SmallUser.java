@@ -28,8 +28,7 @@ public class SmallUser {
     private GeoPoint geoPoint;
     private String img_url;
 
-    public SmallUser(int uid, String username, GeoPoint geoPoint, String img_url) {
-        this.uid = uid;
+    public SmallUser(String username, GeoPoint geoPoint, String img_url) {
         this.username = username;
         this.geoPoint = geoPoint;
         this.img_url = img_url;

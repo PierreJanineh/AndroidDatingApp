@@ -264,6 +264,7 @@
         app:layout_anchor="@id/drawer"
         app:layout_anchorGravity="top|end"
         android:id="@+id/btnChat"
+        android:onClick="openChat"
         android:layout_margin="20dp" />
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         app:backgroundTint="@color/favourite_fab_color_state_list"

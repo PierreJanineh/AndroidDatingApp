@@ -225,7 +225,6 @@ public class UserInfo {
     public int getBirthYearMonthDay(int yearMonthDay){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(birthDate);
-        System.out.println(birthDate);
         switch (yearMonthDay){
             case YEAR:
                 return calendar.get(Calendar.YEAR);

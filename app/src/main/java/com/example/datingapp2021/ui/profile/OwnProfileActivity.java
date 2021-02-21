@@ -39,7 +39,7 @@ public class OwnProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_own_profile);
-        uid = SocketServer.getCurrentUserFrom(getSharedPreferences(SP_USERS, MODE_PRIVATE));
+        uid = SocketServer.getCurrentUserUID(getSharedPreferences(SP_USERS, MODE_PRIVATE));
         profileViewModel();
         getList();
         configAndAttachSlidr();

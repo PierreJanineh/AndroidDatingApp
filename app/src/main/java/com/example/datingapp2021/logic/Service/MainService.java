@@ -8,23 +8,95 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.datingapp2021.logic.Classes.Message;
+import com.example.datingapp2021.logic.Classes.Room;
+import com.example.datingapp2021.logic.Classes.SmallUser;
 import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
+import com.example.datingapp2021.logic.DB.GetMessagesThread;
 import com.example.datingapp2021.logic.DB.SocketServer;
-import com.example.datingapp2021.ui.Result;
 
-import java.util.concurrent.Executor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
-
-import javax.security.auth.callback.Callback;
 
 public class MainService extends Service {
     private final Handler handler = new Handler();
     private final MainBinder binder = new MainBinder();
     public final MutableLiveData<WholeCurrentUser> currentUser = new MutableLiveData<>();
+    public final MutableLiveData<Integer> roomUID = new MutableLiveData<>();
+    public final MutableLiveData<SmallUser> user = new MutableLiveData<>();
+    public List<Message> roomMessages;
+
+    private GetMessagesThread getMessagesThread;
 
     private Object result;
 
     public MainService() {
+    }
+
+    public void sendMessage(Room room){
+        runOnBackground(new ServiceCallback() {
+            @Override
+            public Object run() {
+                return SocketServer.sendMessage(room.toString());
+            }
+
+            @Override
+            public void onComplete(Object result) {
+                roomUID.setValue((int) result);
+            }
+        });
+    }
+
+    /**
+     * Gets Room from DB.
+     * @param roomUid
+     * uid of Room to get Messages from.
+     */
+    public void startGettingRoomMessages(int roomUid, GetMessagesThread.MessagesListener listener){
+        runOnBackground(new ServiceCallback() {
+            @Override
+            public Object run() {
+                getMessagesThread = new GetMessagesThread(roomUid , new GetMessagesThread.MessageListener() {
+                    @Override
+                    public void onNewMessage(Message message) {
+                        if (roomMessages == null) {
+                            roomMessages = new ArrayList<>();
+                        }
+                        roomMessages.add(message);
+                        listener.onNewMessage(roomMessages);
+                    }
+                });
+                getMessagesThread.start();
+                return null;
+            }
+
+            @Override
+            public void onComplete(Object result) {
+
+            }
+        });
+    }
+
+    /**
+     * Gets SmallUser from DB.
+     * @param uid
+     * uid of User
+     */
+    public void getUser(int uid){
+        if (user.getValue() == null){
+            runOnBackground(new ServiceCallback() {
+                @Override
+                public Object run() {
+                    return SocketServer.getSmallUser(uid);
+                }
+
+                @Override
+                public void onComplete(Object result) {
+                    user.setValue((SmallUser) result);
+                }
+            });
+        }
     }
 
     /**
@@ -37,7 +109,6 @@ public class MainService extends Service {
             runOnBackground(new ServiceCallback() {
                 @Override
                 public Object run() {
-                    System.out.println("running service getCurrentUser()");
                     return SocketServer.getCurrentUser(uid);
                 }
 
@@ -78,7 +149,7 @@ public class MainService extends Service {
     }
 
     private void runOnBackground(ServiceCallback callback){
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        Executors.newCachedThreadPool().execute(new Runnable() {
             @Override
             public void run() {
                 result = callback.run();
@@ -101,11 +172,13 @@ public class MainService extends Service {
         return binder;
     }
 
-//    @Override
-//    public boolean onUnbind(Intent intent) {
-//        System.out.println("Service UNBOUND");
-//        return allowRebind;
-//    }
+    @Override
+    public boolean onUnbind(Intent intent) {
+        if (getMessagesThread != null){
+            getMessagesThread.stopGettingMessages();
+        }
+        return super.onUnbind(intent);
+    }
 
     @Override
     public void onDestroy() {
