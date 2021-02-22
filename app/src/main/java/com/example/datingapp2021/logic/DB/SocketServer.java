@@ -50,6 +50,7 @@ public class SocketServer {
     public static final int UPDATE_LOCATION = 150;
     /*USER_INFO*/
     public static final int GET_ALL_ROOMS = 160;
+    public static final int GET_USERS_OF_ROOMS_FOR_USER = 161;
 
     /*SERVER_CODES*/
     public static final int OKAY = 200;
@@ -925,6 +926,51 @@ public class SocketServer {
             outputStream.write(uid);
 
             return new WholeCurrentUser(inputStream);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static List<SmallUser> getAllUsersOfRoomsForUser(int uid){
+        Socket socket = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try{
+            socket = new Socket(HOST, PORT);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            outputStream.write(GET_USERS_OF_ROOMS_FOR_USER);
+            outputStream.write(uid);
+
+            return SmallUser.getUsers(inputStream);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

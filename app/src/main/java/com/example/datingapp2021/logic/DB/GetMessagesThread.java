@@ -58,7 +58,7 @@ public class GetMessagesThread extends Thread {
                 }
 
                 Message message;
-                while (socket.isConnected()){
+                while (true){
                     try {
                         message = new Message(inputStream);
                         messages.add(message);
@@ -71,7 +71,7 @@ public class GetMessagesThread extends Thread {
                 }
 
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
 
                 }

@@ -25,6 +25,7 @@ public class MainService extends Service {
     public final MutableLiveData<WholeCurrentUser> currentUser = new MutableLiveData<>();
     public final MutableLiveData<Integer> roomUID = new MutableLiveData<>();
     public final MutableLiveData<SmallUser> user = new MutableLiveData<>();
+    public final MutableLiveData<List<SmallUser>> smallUsers = new MutableLiveData<>();
     public List<Message> roomMessages;
 
     private GetMessagesThread getMessagesThread;
@@ -174,6 +175,7 @@ public class MainService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        System.out.println("Service UNBOUND");
         if (getMessagesThread != null){
             getMessagesThread.stopGettingMessages();
         }
@@ -183,6 +185,9 @@ public class MainService extends Service {
     @Override
     public void onDestroy() {
         System.out.println("Service DONE");
+        if (getMessagesThread != null){
+            getMessagesThread.stopGettingMessages();
+        }
         super.onDestroy();
     }
 

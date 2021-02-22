@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.datingapp2021.logic.Classes.SmallUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.ui.Result;
 
@@ -18,6 +19,7 @@ public class DashboardViewModel extends ViewModel {
     private MutableLiveData<List<UserDistance>> favouriteUsers;
     private MutableLiveData<List<UserDistance>> newUsers;
     private MutableLiveData<List<UserDistance>> nearbyUsers;
+    private MutableLiveData<List<SmallUser>> roomsUsers;
     private MutableLiveData<Drawable> image;
     private final DashboardRepository repository;
     public boolean nearbyIsNull = true;
@@ -27,6 +29,7 @@ public class DashboardViewModel extends ViewModel {
         favouriteUsers = new MutableLiveData<>();
         nearbyUsers = new MutableLiveData<>();
         newUsers = new MutableLiveData<>();
+        roomsUsers = new MutableLiveData<>();
         image = new MutableLiveData<>();
         this.repository = new DashboardRepository(Executors.newSingleThreadExecutor(), new Handler());
     }
@@ -35,9 +38,25 @@ public class DashboardViewModel extends ViewModel {
         favouriteUsers = new MutableLiveData<>();
         nearbyUsers = new MutableLiveData<>();
         newUsers = new MutableLiveData<>();
+        roomsUsers = new MutableLiveData<>();
         image = new MutableLiveData<>();
         this.repository = repository;
     }
+
+    public void getUsersOfRoomsForUser(int uid){
+        repository.getUsersOfRoomsForUser(uid, new Callback<List<SmallUser>>() {
+            @Override
+            public void onComplete(Result<List<SmallUser>> result) {
+                if (result instanceof Result.Success) {
+                    roomsUsers.setValue(((Result.Success<List<SmallUser>>) result).data);
+                }else {
+                    roomsUsers.setValue(null);
+                    roomsUsers.postValue(null);
+                }
+            }
+        });
+    }
+
 
     public void getFavouriteUsers(int uid){
         repository.getFavouriteUsers(uid, new Callback<List<UserDistance>>() {
@@ -108,6 +127,11 @@ public class DashboardViewModel extends ViewModel {
                 }
             }
         });
+    }
+
+    public LiveData<List<SmallUser>> getUsersOfRoomsForUserList(int uid){
+        getUsersOfRoomsForUser(uid);
+        return roomsUsers;
     }
 
     public LiveData<List<UserDistance>> getFavouriteUsersList(int uid){

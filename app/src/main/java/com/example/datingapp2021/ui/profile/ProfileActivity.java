@@ -21,6 +21,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.datingapp2021.R;
 import com.example.datingapp2021.logic.Classes.Image;
+import com.example.datingapp2021.logic.Classes.UserInfo;
 import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
@@ -81,12 +82,9 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        bindServiceAndGetUids();
         setAllViewVariables();
-        configAndAttachSlidr();
-        setBottomSheetBehavior();
+        bindServiceAndGetUids();
         profileViewModel();
-        initViewPagerAdapter();
     }
 
     private void bindServiceAndGetUids() {
@@ -150,6 +148,9 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         txtRole = findViewById(R.id.txtRole);
         txtEthnicity = findViewById(R.id.txtEthnicity);
         txtReference = findViewById(R.id.txtReference);
+        configAndAttachSlidr();
+        setBottomSheetBehavior();
+        initViewPagerAdapter();
     }
 
     /**
@@ -167,12 +168,12 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
                     txtAbout.setText(userDistance.getWholeUser().getInfo().getAbout());
                     txtHeight.setText(userDistance.getWholeUser().getInfo().getHeight() + "");
                     txtWeight.setText(userDistance.getWholeUser().getInfo().getWeight() + "");
-                    txtRelationship.setText(userDistance.getWholeUser().getInfo().getRelationship().name());
-                    txtReligion.setText(userDistance.getWholeUser().getInfo().getReligion().name());
-                    txtOrientation.setText(userDistance.getWholeUser().getInfo().getOrientation().name());
-                    txtRole.setText(userDistance.getWholeUser().getInfo().getRole().name());
-                    txtEthnicity.setText(userDistance.getWholeUser().getInfo().getEthnicity().name());
-                    txtReference.setText(userDistance.getWholeUser().getInfo().getReference().name());
+                    txtRelationship.setText(getResources().getStringArray(R.array.relationship)[UserInfo.Relationship.getValOf(userDistance.getWholeUser().getInfo().getRelationship())]);
+                    txtReligion.setText(getResources().getStringArray(R.array.religion)[UserInfo.Religion.getValOf(userDistance.getWholeUser().getInfo().getReligion())]);
+                    txtOrientation.setText(getResources().getStringArray(R.array.orientation)[UserInfo.Orientation.getValOf(userDistance.getWholeUser().getInfo().getOrientation())]);
+                    txtRole.setText(getResources().getStringArray(R.array.role)[UserInfo.Role.getValOf(userDistance.getWholeUser().getInfo().getRole())]);
+                    txtEthnicity.setText(getResources().getStringArray(R.array.ethnicity)[UserInfo.Ethnicity.getValOf(userDistance.getWholeUser().getInfo().getEthnicity())]);
+                    txtReference.setText(getResources().getStringArray(R.array.reference)[UserInfo.Reference.getValOf(userDistance.getWholeUser().getInfo().getReference())]);
                 }
             }
         });
@@ -248,7 +249,6 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
     }
 
     private void initViewPagerAdapter() {
-
         viewPager = findViewById(R.id.viewPager);
         profileImagesViewPagerAdapter = new ProfileImagesViewPagerAdapter(getSupportFragmentManager(), this.getLifecycle());
         images.observe(this, new Observer<ArrayList<Image>>() {
@@ -260,7 +260,6 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         });
         viewPager.setAdapter(profileImagesViewPagerAdapter);
     }
-
 
     public void showHide(View view) {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
@@ -306,6 +305,14 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         }
     }
 
+    public void openChat(View view) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("uid", otherUid);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -313,14 +320,6 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
             unbindService(serviceConnection);
             bound = false;
         }
-    }
-
-    public void openChat(View view) {
-        Intent intent = new Intent(this, ChatActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putInt("uid", otherUid);
-        intent.putExtras(bundle);
-        startActivity(intent);
     }
 
 }

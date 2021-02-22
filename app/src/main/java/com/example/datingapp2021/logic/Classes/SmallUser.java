@@ -1,11 +1,15 @@
 package com.example.datingapp2021.logic.Classes;
 
 import com.example.datingapp2021.logic.DB.SocketServer;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.datingapp2021.logic.Classes.GeoPoint.GEO_POINT;
 import static com.example.datingapp2021.logic.Classes.WholeUser.IMG_URL;
@@ -51,6 +55,18 @@ public class SmallUser {
         this.username = user.getUsername();
         this.geoPoint = user.getGeoPoint();
         this.img_url = user.getImg_url();
+    }
+
+    public static List<SmallUser> getUsers(InputStream inputStream){
+        ArrayList<SmallUser> users = new ArrayList<>();
+
+        String s = SocketServer.readStringFromInptStrm(inputStream);
+        JsonParser parser = new JsonParser();
+        JsonArray array = parser.parse(s).getAsJsonArray();
+        for (JsonElement element : array) {
+            users.add(new SmallUser(element.getAsJsonObject()));
+        }
+        return users;
     }
 
     public int getUid() {

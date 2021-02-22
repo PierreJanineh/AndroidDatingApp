@@ -24,7 +24,7 @@ import com.example.datingapp2021.logic.Classes.WholeCurrentUser;
 import com.example.datingapp2021.logic.DB.GetMessagesThread;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.logic.Service.MainService;
-import com.example.datingapp2021.ui.Adapters.ChatThreadsRecyclerViewAdapter;
+import com.example.datingapp2021.ui.Adapters.ChatsRecyclerViewAdapter;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private int uid, otherUid;
     private Room room = null;
     private List<Message> messages = new ArrayList<>();
-    private ChatThreadsRecyclerViewAdapter chatThreadsRecyclerViewAdapter;
+    private ChatsRecyclerViewAdapter chatsRecyclerViewAdapter;
 
     private SmallUser to, from;
 
@@ -63,7 +63,7 @@ public class ChatActivity extends AppCompatActivity {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            chatThreadsRecyclerViewAdapter.setList(messages);
+                                            chatsRecyclerViewAdapter.setList(messages);
                                         }
                                     });
                                 }
@@ -124,9 +124,9 @@ public class ChatActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.list_of_messages);
         SharedPreferences sharedPreferences = getSharedPreferences(SP_USERS, MODE_PRIVATE);
-        chatThreadsRecyclerViewAdapter = new ChatThreadsRecyclerViewAdapter(room, messages, sharedPreferences);
+        chatsRecyclerViewAdapter = new ChatsRecyclerViewAdapter(room, messages, sharedPreferences);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyclerView.setAdapter(chatThreadsRecyclerViewAdapter);
+        recyclerView.setAdapter(chatsRecyclerViewAdapter);
         recyclerView.setLayoutManager(linearLayoutManager);
     }
 
@@ -172,5 +172,14 @@ public class ChatActivity extends AppCompatActivity {
             room.setLastMessage(message);
         }
         service.sendMessage(room);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bound){
+            unbindService(serviceConnection);
+            bound = false;
+        }
     }
 }

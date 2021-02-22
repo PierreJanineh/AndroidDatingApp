@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
+import com.example.datingapp2021.logic.Classes.SmallUser;
 import com.example.datingapp2021.logic.Classes.UserDistance;
 import com.example.datingapp2021.logic.DB.SocketServer;
 import com.example.datingapp2021.ui.Result;
@@ -25,6 +26,15 @@ public class DashboardRepository {
         this.handler = handler;
     }
 
+    private void notifySmallUsersResult(final Result<List<SmallUser>> result, final Callback<List<SmallUser>> callback){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onComplete(result);
+            }
+        });
+    }
+
     private void notifyResult(final Result<List<UserDistance>> result, final Callback<List<UserDistance>> callback){
         handler.post(new Runnable() {
             @Override
@@ -39,6 +49,20 @@ public class DashboardRepository {
             @Override
             public void run() {
                 callback.onComplete(result);
+            }
+        });
+    }
+
+    public void getUsersOfRoomsForUser(int uid, Callback<List<SmallUser>> callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    notifySmallUsersResult(makeSynchronousGetUsersOfRoomsForUser(uid), callback);
+                }catch (Exception e){
+                    Result<List<SmallUser>> errorResult = new Result.Error<>(e);
+                    notifySmallUsersResult(errorResult, callback);
+                }
             }
         });
     }
@@ -98,6 +122,15 @@ public class DashboardRepository {
 
             }
         });
+    }
+
+    public Result<List<SmallUser>> makeSynchronousGetUsersOfRoomsForUser(int uid) {
+        List<SmallUser> result = SocketServer.getAllUsersOfRoomsForUser(uid);
+        if (result == null) {
+            return new Result.SuccessNULL<>("null object received");
+        }else {
+            return new Result.Success<>(result);
+        }
     }
 
     public Result<List<UserDistance>> makeSynchronousGetFavouriteUsers(int uid) {

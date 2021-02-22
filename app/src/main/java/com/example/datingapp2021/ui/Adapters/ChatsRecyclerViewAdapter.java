@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatThreadsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class ChatsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
 	private Room room;
 	private List<Message> messagesList;
@@ -28,7 +28,7 @@ public class ChatThreadsRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
 	private Boolean isFromMe;
 	private int pos;
 	
-	public ChatThreadsRecyclerViewAdapter(Room room, List<Message> messagesList, SharedPreferences sharedPreferences) {
+	public ChatsRecyclerViewAdapter(Room room, List<Message> messagesList, SharedPreferences sharedPreferences) {
 		this.room = room;
 		setList(messagesList);
 		this.sharedPreferences = sharedPreferences;

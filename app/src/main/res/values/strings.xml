@@ -22,4 +22,7 @@
     <!-- FAVOURITES FRAGMENT -->
     <string name="title_favourites">Favourites</string>
     <string name="no_favourites">No favourite users have been added.</string>
+
+    <!-- MESSAGES FRAGMENT -->
+    <string name="no_chats">No chats have been started yet.</string>
 </resources>
