@@ -7,6 +7,13 @@
     <string name="profile_editor">Profile Editor</string>
     <string name="chat">Chat</string>
 
+    <!-- FAVOURITES FRAGMENT -->
+    <string name="title_favourites">Favourites</string>
+    <string name="no_favourites">No favourite users have been added.</string>
+
+    <!-- MESSAGES FRAGMENT -->
+    <string name="no_chats">No chats have been started yet.</string>
+
     <!-- SETTINGS ACTIVITY -->
     <string name="profile_settings">Profile Settings</string>
     <string name="enable">Enable</string>
@@ -19,10 +26,17 @@
     <string name="on_profile_views">on profile views</string>
     <string name="privacy">Privacy</string>
 
-    <!-- FAVOURITES FRAGMENT -->
-    <string name="title_favourites">Favourites</string>
-    <string name="no_favourites">No favourite users have been added.</string>
+    <!-- PROFILE -->
+    <string name="about">About</string>
+    <string name="role">Role: </string>
+    <string name="height">Height: </string>
+    <string name="weight">Weight: </string>
+    <string name="ethnicity">Ethnicity: </string>
+    <string name="relationship">Relationship: </string>
+    <string name="reference">Reference: </string>
+    <string name="orientation">Orientation: </string>
+    <string name="religion">Religion: </string>
+    <string name="disabilities">Disabilities: </string>
+    <string name="stds">STDs: </string>
 
-    <!-- MESSAGES FRAGMENT -->
-    <string name="no_chats">No chats have been started yet.</string>
 </resources>

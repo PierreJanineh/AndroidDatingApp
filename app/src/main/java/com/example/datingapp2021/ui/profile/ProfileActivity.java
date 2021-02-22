@@ -60,7 +60,9 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
             txtRelationship,
             txtReference,
             txtOrientation,
-            txtReligion;
+            txtReligion,
+            txtDisabilities,
+            txtSTDs;
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
 
     /*Service Connection*/
@@ -148,6 +150,9 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
         txtRole = findViewById(R.id.txtRole);
         txtEthnicity = findViewById(R.id.txtEthnicity);
         txtReference = findViewById(R.id.txtReference);
+        txtDisabilities = findViewById(R.id.txtDisabilities);
+        txtSTDs = findViewById(R.id.txtSTDs);
+
         configAndAttachSlidr();
         setBottomSheetBehavior();
         initViewPagerAdapter();
@@ -174,6 +179,25 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
                     txtRole.setText(getResources().getStringArray(R.array.role)[UserInfo.Role.getValOf(userDistance.getWholeUser().getInfo().getRole())]);
                     txtEthnicity.setText(getResources().getStringArray(R.array.ethnicity)[UserInfo.Ethnicity.getValOf(userDistance.getWholeUser().getInfo().getEthnicity())]);
                     txtReference.setText(getResources().getStringArray(R.array.reference)[UserInfo.Reference.getValOf(userDistance.getWholeUser().getInfo().getReference())]);
+
+                    String seperator = " ,";
+                    StringBuilder s = new StringBuilder();
+                    for (int i = 0; i < userDistance.getWholeUser().getInfo().getDisabilities().size(); i++) {
+                        s.append(getResources().getStringArray(R.array.disability)[UserInfo.Disability.getValOf(userDistance.getWholeUser().getInfo().getDisabilities().get(i))]);
+                        if (i != userDistance.getWholeUser().getInfo().getDisabilities().size()-1){
+                            s.append(seperator);
+                        }
+                    }
+                    txtDisabilities.setText(s);
+
+                    s = new StringBuilder();
+                    for (int i = 0; i < userDistance.getWholeUser().getInfo().getStDs().size(); i++) {
+                        s.append(getResources().getStringArray(R.array.stds)[UserInfo.STD.getValOf(userDistance.getWholeUser().getInfo().getStDs().get(i))]);
+                        if (i != userDistance.getWholeUser().getInfo().getDisabilities().size()-1){
+                            s.append(seperator);
+                        }
+                    }
+                    txtSTDs.setText(s);
                 }
             }
         });
