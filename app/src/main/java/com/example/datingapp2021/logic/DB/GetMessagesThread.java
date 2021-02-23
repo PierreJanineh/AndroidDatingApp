@@ -71,7 +71,7 @@ public class GetMessagesThread extends Thread {
                 }
 
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
 
                 }

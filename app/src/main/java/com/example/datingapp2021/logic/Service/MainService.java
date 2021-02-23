@@ -23,7 +23,7 @@ public class MainService extends Service {
     private final Handler handler = new Handler();
     private final MainBinder binder = new MainBinder();
     public final MutableLiveData<WholeCurrentUser> currentUser = new MutableLiveData<>();
-    public final MutableLiveData<Integer> roomUID = new MutableLiveData<>();
+    public final MutableLiveData<Room> room = new MutableLiveData<>();
     public final MutableLiveData<SmallUser> user = new MutableLiveData<>();
     public final MutableLiveData<List<SmallUser>> smallUsers = new MutableLiveData<>();
     public List<Message> roomMessages;
@@ -44,7 +44,7 @@ public class MainService extends Service {
 
             @Override
             public void onComplete(Object result) {
-                roomUID.setValue((int) result);
+                MainService.this.room.setValue((Room) result);
             }
         });
     }

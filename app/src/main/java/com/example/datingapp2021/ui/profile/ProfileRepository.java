@@ -58,6 +58,15 @@ public class ProfileRepository {
         });
     }
 
+    public void profileView(int uid, int otherUID) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                makeSynchronousProfileView(uid, otherUID);
+            }
+        });
+    }
+
     public void getImages(int uid, Callback<ArrayList<Image>> callback) {
         executor.execute(new Runnable() {
             @Override
@@ -140,6 +149,10 @@ public class ProfileRepository {
                 }
             }
         });
+    }
+
+    public void makeSynchronousProfileView(int uid, int otherUID) {
+        SocketServer.profileView(uid, otherUID);
     }
 
     public Result<ArrayList<Image>> makeSynchronousGetImages(int uid) {

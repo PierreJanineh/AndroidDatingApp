@@ -27,13 +27,6 @@
             android:text="@string/show_age"
             android:paddingStart="30dp"
             android:paddingEnd="30dp"/>
-        <ToggleButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textOff="@string/connect_to_facebook"
-            android:textOn="@string/disconnect_facebook"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp" />
     </LinearLayout>
 
     <LinearLayout

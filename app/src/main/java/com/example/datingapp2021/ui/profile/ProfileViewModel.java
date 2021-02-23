@@ -48,6 +48,10 @@ public class ProfileViewModel {
         this.repository = repository;
     }
 
+    public void profileView(int uid, int otherUID) {
+        repository.profileView(uid, otherUID);
+    }
+
     public void getImages(int uid) {
         repository.getImages(uid, new Callback<ArrayList<Image>>() {
             @Override

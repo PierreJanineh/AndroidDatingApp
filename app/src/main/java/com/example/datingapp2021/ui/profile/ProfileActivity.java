@@ -207,6 +207,7 @@ public class ProfileActivity extends AppCompatActivity implements LifecycleOwner
                 ProfileActivity.this.images.setValue(images);
             }
         });
+        profileViewModel.profileView(uid, otherUid);
     }
 
     /**

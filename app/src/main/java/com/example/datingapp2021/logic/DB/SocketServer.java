@@ -51,6 +51,7 @@ public class SocketServer {
     /*USER_INFO*/
     public static final int GET_ALL_ROOMS = 160;
     public static final int GET_USERS_OF_ROOMS_FOR_USER = 161;
+    public static final int PROFILE_VIEW = 162;
 
     /*SERVER_CODES*/
     public static final int OKAY = 200;
@@ -141,9 +142,9 @@ public class SocketServer {
      * @param roomJson
      * Room JsonObject.
      * @return
-     * boolean true if succeeded, false if message already exists.
+     * Updated Room object.
      */
-    public static int sendMessage(String roomJson){
+    public static Room sendMessage(String roomJson){
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -156,8 +157,7 @@ public class SocketServer {
             byte[] messageBytes = roomJson.getBytes();
             outputStream.write(messageBytes.length);
             outputStream.write(messageBytes);
-            int roomUID = inputStream.read();
-            return roomUID;
+            return new Room(inputStream);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -185,7 +185,7 @@ public class SocketServer {
                 }
             }
         }
-        return 0;
+        return null;
     }
 
     /**
@@ -1001,6 +1001,50 @@ public class SocketServer {
             }
         }
         return null;
+    }
+
+    public static void profileView(int uid, int otherUID){
+        Socket socket = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try{
+            socket = new Socket(HOST, PORT);
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            outputStream.write(PROFILE_VIEW);
+            outputStream.write(uid);
+            outputStream.write(otherUID);
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 

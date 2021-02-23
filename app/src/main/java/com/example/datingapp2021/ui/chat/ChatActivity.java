@@ -38,6 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private int uid, otherUid;
     private Room room = null;
     private List<Message> messages = new ArrayList<>();
+    private RecyclerView recyclerView;
     private ChatsRecyclerViewAdapter chatsRecyclerViewAdapter;
 
     private SmallUser to, from;
@@ -64,6 +65,7 @@ public class ChatActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
                                             chatsRecyclerViewAdapter.setList(messages);
+                                            recyclerView.smoothScrollToPosition(messages.size()-1);
                                         }
                                     });
                                 }
@@ -75,10 +77,10 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
 
-            service.roomUID.observe(ChatActivity.this, new Observer<Integer>() {
+            service.room.observe(ChatActivity.this, new Observer<Room>() {
                 @Override
-                public void onChanged(Integer integer) {
-                    room.setUid(integer);
+                public void onChanged(Room room) {
+                    ChatActivity.this.room = room;
                 }
             });
 
@@ -122,7 +124,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        RecyclerView recyclerView = findViewById(R.id.list_of_messages);
+        recyclerView = findViewById(R.id.list_of_messages);
         SharedPreferences sharedPreferences = getSharedPreferences(SP_USERS, MODE_PRIVATE);
         chatsRecyclerViewAdapter = new ChatsRecyclerViewAdapter(room, messages, sharedPreferences);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -156,7 +158,8 @@ public class ChatActivity extends AppCompatActivity {
 
     public void sendMsg(View view){
 
-        String content = ((EditText) findViewById(R.id.inptMessage)).getText().toString();
+        EditText inptMsg = (EditText) findViewById(R.id.inptMessage);
+        String content = inptMsg.getText().toString();
         Message message = new Message(content, new Timestamp(new Date().getTime()), to, from);
 
         if(this.room == null){
@@ -172,6 +175,7 @@ public class ChatActivity extends AppCompatActivity {
             room.setLastMessage(message);
         }
         service.sendMessage(room);
+        inptMsg.setText("");
     }
 
     @Override
