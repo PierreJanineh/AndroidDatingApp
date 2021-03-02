@@ -18,6 +18,8 @@ The daying app is currently under development. Note that some changes (such as d
 * [Services](https://developer.android.com/guide/components/services)
   * [Foreground services](https://developer.android.com/guide/components/foreground-services)
   * [Bound services](https://developer.android.com/guide/components/bound-services)
+* Networking
+  * [Socket](https://developer.android.com/reference/java/net/Socket)
 * [UI](https://developer.android.com/guide/topics/ui)
   * [Layout](https://developer.android.com/guide/topics/ui/declaring-layout)
   * [Fragment](https://developer.android.com/guide/fragments)
