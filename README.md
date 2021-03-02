@@ -4,7 +4,7 @@
 
 A dating AndroidX app that lets people connect based on their geo location, the App is still under construction!
 
-The dating app is currently under development. Note that some changes (such as database schema modifications) are not backwards compatible and may cause the app to crach. In the case, please uninstall and reinstall the app.
+The dating app and server are currently under development. Note that some changes (such as database schema modifications) are not backwards compatible and may cause the app to crach. In the case, please uninstall and reinstall the app.
 
 ## Libraries used
 * [Foundation](https://developer.android.com/jetpack/components)
