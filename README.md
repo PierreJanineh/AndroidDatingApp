@@ -33,4 +33,4 @@ The dating app and server are currently under development. Note that some change
 * Geolocation implementation
 * Login/Signup
 
-This Project communicates with a Java server in Repository: https://github.com/PierreJanineh/ServerDatingApp.
+> __This Project communicates with a Java server in Repository: https://github.com/PierreJanineh/ServerDatingApp.__
